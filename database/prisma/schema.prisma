@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  name         String
+  email        String  @unique
+  passwordHash String
+  role         String
+  phone        String?
+  skills              String?
+  rating              Float?  @default(0)
+  failedLoginAttempts Int @default(0)
+  lockoutUntil        DateTime?
+  profilePhotoUrl     String?
+
+  tasksCreated       Task[]    @relation("TasksCreated")
+  tasksAssigned      Task[]    @relation("TasksAssigned")
+  bids               Bid[]
+  reviewsGiven       Review[]  @relation("ReviewsGiven")
+  trackingLogs       TrackingLog[]
+
+  @@map("USERS")
+}
+
+model Task {
+  id                Int      @id @default(autoincrement())
+  title             String
+  description       String
+  category          String
+  budget            Float
+  location          String
+  status            TaskStatus @default(PENDING)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  imageUrls         String[] @default([])
+
+  createdById       Int
+  createdBy         User     @relation("TasksCreated", fields: [createdById], references: [id])
+
+  assignedProviderId Int?
+  assignedProvider   User?    @relation("TasksAssigned", fields: [assignedProviderId], references: [id])
+
+  bids          Bid[]
+  reviews       Review[]
+  trackingLogs  TrackingLog[]
+  aiInsights    AiInsight[]
+
+  @@map("TASKS")
+}
+
+model Bid {
+  id          Int       @id @default(autoincrement())
+  price       Float
+  status      BidStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+
+  taskId      Int
+  task        Task      @relation(fields: [taskId], references: [id])
+
+  providerId  Int
+  provider    User      @relation(fields: [providerId], references: [id])
+
+  @@map("BIDS")
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  taskId      Int
+  task        Task     @relation(fields: [taskId], references: [id])
+
+  reviewerId  Int
+  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+
+  @@map("REVIEWS")
+}
+
+model TrackingLog {
+  id         Int      @id @default(autoincrement())
+  lat        Float
+  lng        Float
+  timestamp  DateTime
+
+  taskId     Int
+  task       Task     @relation(fields: [taskId], references: [id])
+
+  providerId Int
+  provider   User     @relation(fields: [providerId], references: [id])
+
+  @@map("TRACKING_LOGS")
+}
+
+model AiInsight {
+  id                    Int      @id @default(autoincrement())
+  suggestedPrice        Float
+  recommendedProviders  Json
+  confidenceScore       Float
+  createdAt             DateTime @default(now())
+
+  taskId                Int
+  task                  Task     @relation(fields: [taskId], references: [id])
+
+  @@map("AI_INSIGHTS")
+}
+
+enum TaskStatus {
+  PENDING
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
