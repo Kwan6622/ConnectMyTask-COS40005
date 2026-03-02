@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# env / secrets
+.env
+
+# OS / editor
+.DS_Store
+
+# logs
+*.log
+
+# build outputs (tuỳ project, giữ cũng ok)
+dist/
+build/
