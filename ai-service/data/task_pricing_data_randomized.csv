@@ -1,0 +1,1001 @@
+Category,Distance_km,Duration_hours,Is_Urgent,Price
+Plumbing,13.5,1.8,0,186.29
+Plumbing,14.0,4.7,1,180.75
+Delivery,4.4,4.6,1,136.64
+Delivery,13.6,5.0,1,159.98
+Cleaning,10.3,2.8,1,155.45
+Moving Help,2.6,0.7,1,159.24
+Delivery,9.4,1.8,1,65.36
+Delivery,5.4,4.0,0,110.62
+Moving Help,18.4,0.7,1,225.49
+Moving Help,6.4,2.7,1,146.01
+Moving Help,15.8,4.2,0,209.54
+Delivery,5.3,4.3,1,127.44
+Delivery,12.9,0.5,1,70.99
+Delivery,17.0,3.7,0,68.71
+Delivery,19.6,2.2,0,104.0
+Moving Help,13.5,4.6,1,214.58
+Cleaning,18.0,4.9,0,159.04
+Delivery,6.2,3.5,1,123.05
+Cleaning,3.7,4.2,1,109.23
+Cleaning,17.4,3.4,0,95.59
+Delivery,8.3,4.8,1,129.29
+Plumbing,7.2,0.9,0,102.92
+Cleaning,12.2,1.5,0,70.66
+Plumbing,6.1,4.6,1,205.36
+Cleaning,8.9,3.2,0,120.29
+Plumbing,17.0,2.4,1,174.45
+Plumbing,1.9,2.5,1,151.41
+Plumbing,6.0,1.5,1,176.78
+Delivery,2.3,1.0,0,35.38
+Delivery,14.0,4.4,1,156.52
+Delivery,2.9,3.4,0,78.98
+Cleaning,17.4,4.6,0,146.65
+Plumbing,6.5,3.6,0,167.31
+Cleaning,5.3,4.5,0,138.36
+Plumbing,16.4,4.8,0,192.12
+Delivery,14.8,4.8,0,110.44
+Delivery,1.4,4.0,0,61.44
+Plumbing,2.7,1.6,1,134.75
+Moving Help,3.6,0.7,0,143.08
+Cleaning,5.8,4.3,0,82.71
+Plumbing,9.6,2.7,0,171.08
+Delivery,18.5,4.5,1,125.56
+Delivery,1.2,3.9,0,75.4
+Moving Help,19.4,4.4,1,218.01
+Cleaning,15.7,0.7,0,91.29
+Moving Help,6.3,1.8,1,169.6
+Delivery,4.7,2.9,1,71.84
+Plumbing,16.2,1.0,0,172.73
+Plumbing,2.6,3.7,0,125.12
+Moving Help,4.6,0.9,0,124.97
+Moving Help,17.7,3.9,1,208.91
+Delivery,9.7,0.9,0,82.59
+Cleaning,4.5,0.7,0,70.81
+Moving Help,15.0,2.0,0,182.25
+Plumbing,2.3,3.1,0,141.36
+Cleaning,10.3,0.8,1,88.12
+Moving Help,6.2,3.7,0,118.53
+Moving Help,8.9,2.3,1,183.12
+Plumbing,1.6,2.7,0,117.2
+Moving Help,10.4,3.7,0,114.4
+Cleaning,17.5,2.8,1,115.35
+Cleaning,16.2,3.9,0,160.42
+Cleaning,7.7,1.8,1,78.74
+Delivery,17.7,3.6,0,124.3
+Moving Help,3.6,4.7,0,169.94
+Cleaning,13.6,3.8,0,144.4
+Delivery,6.8,4.5,0,84.15
+Moving Help,3.2,4.6,0,172.17
+Cleaning,19.3,3.2,0,141.04
+Delivery,9.7,4.2,1,84.64
+Plumbing,7.7,1.8,1,123.68
+Plumbing,8.3,3.1,0,105.79
+Moving Help,19.0,1.2,1,234.88
+Cleaning,9.8,0.7,0,65.09
+Moving Help,17.0,0.9,0,165.55
+Cleaning,2.7,2.1,1,108.3
+Delivery,7.2,1.1,0,67.02
+Plumbing,19.6,3.6,0,180.19
+Moving Help,4.4,1.3,1,166.46
+Cleaning,3.6,4.2,1,151.1
+Delivery,2.9,2.7,0,95.36
+Moving Help,3.2,4.8,0,214.77
+Cleaning,4.0,2.1,0,62.01
+Delivery,15.8,0.6,0,62.31
+Moving Help,1.0,3.2,0,170.59
+Plumbing,2.6,3.2,0,128.24
+Plumbing,14.6,1.9,0,147.1
+Moving Help,9.4,4.1,1,233.94
+Cleaning,4.4,4.3,1,164.62
+Moving Help,9.8,4.9,0,246.68
+Moving Help,5.5,1.8,1,157.14
+Delivery,9.7,3.4,1,139.29
+Plumbing,2.9,4.5,0,167.49
+Plumbing,7.1,0.6,0,130.79
+Cleaning,15.7,2.0,0,76.69
+Plumbing,5.6,2.6,1,171.62
+Plumbing,5.4,4.6,0,151.5
+Cleaning,13.6,1.1,0,101.46
+Delivery,12.4,2.6,0,116.6
+Cleaning,17.4,2.9,1,159.18
+Delivery,17.2,4.9,0,111.32
+Moving Help,11.4,0.5,1,170.89
+Plumbing,8.5,3.1,1,207.31
+Plumbing,19.1,3.1,0,142.08
+Moving Help,7.0,2.8,1,189.25
+Plumbing,19.2,2.2,1,169.7
+Plumbing,9.6,1.3,1,150.48
+Plumbing,14.4,3.2,1,161.81
+Moving Help,17.7,1.7,1,128.79
+Moving Help,8.1,3.6,1,218.93
+Plumbing,6.0,1.6,1,174.51
+Cleaning,13.0,2.7,0,126.65
+Plumbing,6.4,2.9,0,163.9
+Cleaning,6.1,3.1,0,126.43
+Moving Help,19.6,5.0,1,195.72
+Moving Help,16.1,1.9,1,168.2
+Plumbing,5.4,2.5,0,125.92
+Delivery,8.8,1.2,1,73.02
+Delivery,15.8,4.1,0,80.37
+Cleaning,14.5,1.9,1,146.28
+Moving Help,4.5,4.5,1,185.85
+Cleaning,13.0,3.4,1,157.74
+Moving Help,8.7,3.0,0,182.51
+Plumbing,11.9,1.4,0,120.41
+Plumbing,9.3,1.8,0,110.24
+Cleaning,8.2,1.5,0,90.3
+Moving Help,17.8,3.9,0,160.0
+Delivery,11.3,1.2,0,93.75
+Delivery,3.3,2.9,0,85.21
+Moving Help,7.4,1.8,0,142.25
+Delivery,19.0,4.3,0,144.7
+Cleaning,3.2,2.1,0,107.63
+Cleaning,12.3,3.6,0,127.61
+Cleaning,9.5,1.4,1,121.6
+Moving Help,4.8,2.1,0,127.74
+Plumbing,5.6,1.3,0,156.56
+Cleaning,12.6,3.9,1,97.91
+Plumbing,6.6,3.3,1,148.18
+Plumbing,18.5,1.6,1,160.18
+Delivery,4.2,2.9,1,107.01
+Plumbing,17.0,1.6,0,151.15
+Cleaning,19.8,4.0,1,210.0
+Plumbing,13.1,4.2,1,185.05
+Cleaning,1.5,2.6,0,105.05
+Moving Help,15.9,1.3,1,181.78
+Delivery,11.0,3.8,0,98.49
+Plumbing,12.4,2.0,1,118.69
+Plumbing,14.0,1.6,1,196.35
+Moving Help,14.2,3.3,1,220.49
+Cleaning,15.6,2.8,0,118.63
+Plumbing,9.3,1.4,0,120.12
+Plumbing,13.6,3.7,0,163.98
+Delivery,6.8,2.4,1,84.6
+Cleaning,5.3,3.5,1,136.65
+Cleaning,7.0,2.0,0,84.95
+Moving Help,14.8,2.4,1,194.67
+Plumbing,8.3,1.5,1,175.31
+Plumbing,19.7,3.5,1,185.48
+Delivery,11.3,1.4,1,94.0
+Plumbing,3.5,0.6,1,140.64
+Moving Help,7.7,2.6,0,175.04
+Cleaning,1.4,0.7,0,56.88
+Cleaning,16.0,1.3,0,107.7
+Plumbing,19.5,0.9,1,154.06
+Cleaning,12.1,3.6,0,158.24
+Moving Help,9.2,1.6,0,139.92
+Delivery,12.7,0.9,0,80.48
+Plumbing,15.6,3.2,1,181.04
+Cleaning,12.4,4.4,1,177.17
+Plumbing,14.9,3.0,0,184.17
+Cleaning,11.3,2.0,0,115.59
+Delivery,11.5,1.0,1,84.96
+Cleaning,7.3,2.7,0,136.84
+Cleaning,16.8,4.1,1,132.8
+Delivery,7.4,4.0,0,104.72
+Cleaning,7.4,3.8,1,135.05
+Plumbing,9.5,4.9,0,152.73
+Moving Help,1.6,3.7,0,139.75
+Cleaning,5.0,1.2,1,107.12
+Moving Help,5.7,3.4,0,116.17
+Moving Help,17.3,3.2,0,188.06
+Plumbing,1.7,0.6,0,109.31
+Plumbing,10.2,2.8,0,153.16
+Delivery,6.5,3.2,0,71.9
+Plumbing,6.3,2.5,1,100.68
+Delivery,7.2,3.7,1,152.56
+Plumbing,7.0,1.3,0,110.67
+Plumbing,15.5,4.8,0,169.37
+Plumbing,6.7,3.1,1,140.3
+Cleaning,17.6,0.6,0,130.57
+Moving Help,7.6,3.2,0,131.25
+Plumbing,12.0,1.9,0,106.44
+Plumbing,14.4,0.6,1,179.57
+Cleaning,12.4,1.5,0,113.18
+Plumbing,8.8,3.8,0,100.08
+Moving Help,8.6,1.5,1,175.08
+Plumbing,14.4,3.6,1,192.54
+Delivery,13.1,2.7,0,82.99
+Plumbing,5.6,3.6,0,134.23
+Delivery,9.6,4.4,0,97.78
+Plumbing,6.6,4.3,1,173.52
+Delivery,3.5,2.2,0,76.7
+Delivery,12.1,2.6,1,126.76
+Moving Help,14.2,1.8,0,138.36
+Plumbing,12.6,1.4,1,165.25
+Delivery,8.2,1.3,0,44.18
+Cleaning,19.5,1.3,0,136.12
+Plumbing,15.0,2.4,1,175.91
+Delivery,14.2,4.2,0,111.68
+Moving Help,8.2,3.5,0,153.43
+Cleaning,9.5,1.9,0,110.4
+Delivery,18.4,3.1,1,102.08
+Plumbing,14.7,1.4,0,122.96
+Plumbing,1.8,2.6,1,139.27
+Delivery,12.8,3.6,0,109.51
+Cleaning,1.3,3.6,0,138.4
+Cleaning,9.1,4.8,0,160.91
+Plumbing,4.8,3.2,0,161.02
+Moving Help,16.2,4.9,0,175.14
+Plumbing,11.3,3.0,1,184.07
+Delivery,12.9,1.3,0,74.79
+Moving Help,16.7,3.3,0,141.38
+Plumbing,3.3,4.5,1,204.94
+Plumbing,12.4,1.9,0,133.54
+Delivery,18.5,2.0,0,76.35
+Plumbing,18.9,3.9,1,254.06
+Moving Help,17.1,2.5,0,209.32
+Cleaning,17.5,2.2,0,110.0
+Delivery,11.8,1.7,1,100.86
+Moving Help,6.2,2.8,0,169.02
+Plumbing,4.2,2.9,0,128.09
+Plumbing,13.5,2.3,0,134.3
+Moving Help,8.3,2.8,0,130.7
+Moving Help,2.4,1.4,1,192.46
+Delivery,12.4,4.7,1,156.97
+Delivery,18.0,2.6,0,85.9
+Plumbing,18.4,3.1,1,160.15
+Plumbing,1.8,3.8,1,143.3
+Delivery,16.8,4.5,1,138.62
+Cleaning,5.7,2.8,1,149.97
+Moving Help,9.8,0.7,1,121.37
+Moving Help,18.9,2.4,1,199.72
+Cleaning,17.1,0.7,0,102.81
+Cleaning,3.9,3.5,0,126.32
+Plumbing,2.2,1.8,1,141.24
+Cleaning,6.2,2.6,1,124.34
+Moving Help,1.9,2.1,0,145.66
+Plumbing,7.3,2.1,0,116.53
+Moving Help,11.3,4.4,0,219.55
+Moving Help,4.9,3.8,1,202.55
+Delivery,15.0,4.3,1,139.33
+Delivery,12.4,2.3,0,90.74
+Cleaning,17.9,1.2,1,98.81
+Plumbing,18.9,1.5,1,127.41
+Plumbing,13.9,2.0,0,137.99
+Moving Help,16.8,1.8,0,112.08
+Moving Help,10.5,0.6,0,151.15
+Plumbing,7.3,1.0,1,118.51
+Plumbing,2.3,3.5,1,135.58
+Plumbing,17.2,2.3,1,207.5
+Cleaning,2.6,4.2,0,123.47
+Delivery,3.4,1.1,1,75.49
+Cleaning,13.8,2.2,1,142.32
+Moving Help,16.6,1.8,1,217.18
+Cleaning,12.4,2.7,0,120.55
+Cleaning,4.4,1.3,0,55.54
+Plumbing,5.2,2.1,0,125.51
+Moving Help,10.4,2.9,1,139.99
+Moving Help,12.5,1.6,0,187.32
+Plumbing,14.5,2.9,1,160.88
+Delivery,15.1,1.8,1,124.68
+Cleaning,8.2,4.7,0,104.07
+Delivery,17.6,4.7,0,152.15
+Plumbing,16.0,1.3,1,199.17
+Plumbing,19.7,1.3,1,200.63
+Plumbing,13.2,0.9,1,166.58
+Plumbing,8.8,1.3,1,103.36
+Plumbing,13.0,2.9,0,152.25
+Moving Help,14.1,2.1,0,194.45
+Cleaning,17.9,2.2,0,121.46
+Plumbing,11.4,2.6,0,136.79
+Moving Help,14.9,1.5,1,167.38
+Delivery,5.8,1.9,1,86.13
+Moving Help,7.7,2.2,0,142.64
+Moving Help,13.3,2.9,1,233.85
+Cleaning,3.1,3.3,1,109.36
+Plumbing,2.1,4.7,1,183.51
+Moving Help,3.8,4.7,1,218.43
+Cleaning,19.3,1.9,0,115.18
+Plumbing,12.7,3.2,0,156.66
+Plumbing,14.1,4.3,1,188.94
+Cleaning,3.3,2.8,0,108.29
+Plumbing,8.4,4.0,1,210.15
+Moving Help,6.9,2.0,0,134.8
+Plumbing,11.9,4.2,0,139.4
+Delivery,1.4,3.3,1,118.27
+Delivery,7.5,3.2,0,113.34
+Delivery,14.3,2.1,1,83.82
+Plumbing,7.9,2.0,1,189.44
+Delivery,2.0,1.9,1,86.44
+Plumbing,4.5,4.4,1,195.6
+Plumbing,3.0,1.7,1,151.43
+Plumbing,10.0,3.1,1,120.52
+Moving Help,13.6,2.6,0,148.15
+Delivery,1.6,3.7,1,102.05
+Cleaning,1.5,2.6,0,100.26
+Moving Help,16.5,3.7,1,240.67
+Cleaning,16.9,4.3,0,106.32
+Cleaning,18.5,4.1,0,167.01
+Moving Help,15.0,4.8,0,181.36
+Delivery,1.1,1.6,0,50.83
+Moving Help,18.0,3.2,0,194.77
+Moving Help,6.6,3.1,1,179.31
+Cleaning,1.6,4.7,1,118.58
+Delivery,19.7,3.9,0,131.4
+Cleaning,6.6,2.3,1,131.83
+Cleaning,5.0,2.8,0,115.64
+Delivery,10.4,2.8,0,78.7
+Plumbing,1.6,4.2,0,151.89
+Moving Help,1.8,0.6,1,180.37
+Plumbing,1.5,4.3,1,204.13
+Delivery,19.3,4.5,1,137.83
+Cleaning,17.6,2.8,1,129.44
+Delivery,19.2,2.3,0,126.04
+Plumbing,16.2,3.6,1,202.73
+Delivery,5.5,2.3,1,73.04
+Plumbing,9.9,2.2,1,146.22
+Moving Help,10.4,1.7,0,174.78
+Moving Help,10.3,4.9,1,214.55
+Plumbing,16.5,0.6,1,146.23
+Plumbing,2.8,1.0,1,108.09
+Delivery,19.7,4.1,1,123.48
+Moving Help,1.7,1.0,0,110.02
+Moving Help,18.4,1.0,1,192.28
+Plumbing,18.5,4.1,1,184.74
+Moving Help,13.5,2.4,1,247.86
+Moving Help,3.2,1.4,0,130.03
+Plumbing,12.2,2.3,0,149.49
+Plumbing,1.9,1.9,0,85.41
+Cleaning,6.9,3.0,0,91.86
+Plumbing,8.4,2.0,0,129.43
+Moving Help,13.3,0.8,1,204.77
+Delivery,2.5,1.3,0,48.25
+Cleaning,19.1,0.5,1,135.87
+Moving Help,8.4,3.5,0,147.89
+Plumbing,9.5,1.5,0,132.84
+Plumbing,9.6,3.1,1,152.1
+Delivery,8.4,4.6,0,77.07
+Plumbing,8.0,4.0,1,128.14
+Delivery,12.8,2.1,1,102.3
+Delivery,11.3,3.2,0,77.52
+Plumbing,13.2,1.8,1,165.37
+Delivery,5.5,2.9,1,96.38
+Cleaning,12.2,1.8,0,96.24
+Plumbing,3.6,3.3,0,116.3
+Delivery,4.0,2.5,1,63.94
+Plumbing,13.8,3.7,0,147.85
+Delivery,15.7,0.6,0,78.1
+Plumbing,6.4,2.8,1,166.29
+Plumbing,5.0,2.4,0,133.59
+Plumbing,19.6,0.8,0,156.47
+Delivery,6.0,1.4,0,38.47
+Cleaning,5.0,0.6,0,80.26
+Plumbing,9.6,0.8,0,105.74
+Cleaning,11.0,3.7,1,167.61
+Plumbing,10.8,2.3,1,196.01
+Plumbing,2.4,3.5,1,167.9
+Delivery,15.2,4.6,1,154.73
+Cleaning,12.1,3.8,1,124.71
+Moving Help,6.9,1.8,1,184.58
+Cleaning,11.7,2.2,1,129.81
+Delivery,12.3,3.5,0,71.7
+Delivery,3.0,1.5,0,77.77
+Delivery,8.3,2.4,1,91.62
+Plumbing,13.1,3.0,0,172.17
+Plumbing,7.5,3.0,1,151.85
+Plumbing,7.0,3.3,1,196.1
+Plumbing,5.9,4.2,0,129.73
+Moving Help,18.1,1.1,1,163.3
+Cleaning,7.3,1.7,1,122.41
+Delivery,9.5,1.8,0,103.29
+Delivery,13.9,4.9,0,133.73
+Plumbing,10.0,3.1,1,181.34
+Plumbing,2.3,1.9,1,167.16
+Plumbing,2.3,3.9,1,152.68
+Plumbing,3.4,2.6,0,88.22
+Cleaning,19.0,1.5,0,139.0
+Delivery,15.0,0.8,1,67.27
+Delivery,6.4,0.6,1,93.18
+Delivery,10.0,1.2,0,65.88
+Delivery,13.2,3.5,0,110.04
+Moving Help,17.6,3.0,1,183.83
+Plumbing,17.7,0.5,0,142.2
+Moving Help,3.6,4.9,1,219.09
+Delivery,3.6,3.3,0,83.8
+Plumbing,15.8,3.0,1,164.34
+Moving Help,13.4,4.9,0,199.91
+Moving Help,1.3,1.3,0,149.32
+Plumbing,12.2,5.0,1,228.21
+Cleaning,19.6,3.9,0,94.24
+Cleaning,9.8,4.4,1,144.22
+Delivery,9.6,0.8,1,53.66
+Moving Help,11.8,2.1,1,148.82
+Cleaning,15.8,1.9,0,104.52
+Plumbing,7.8,2.9,0,128.87
+Plumbing,4.7,0.7,1,145.93
+Plumbing,16.4,1.8,1,143.83
+Cleaning,13.8,2.8,0,130.54
+Moving Help,3.9,2.2,1,158.69
+Plumbing,11.2,2.4,1,155.47
+Cleaning,16.3,2.3,1,136.15
+Cleaning,8.0,4.3,1,120.31
+Delivery,9.1,4.5,1,81.37
+Cleaning,5.5,1.4,0,103.55
+Cleaning,12.3,2.6,0,119.96
+Moving Help,4.1,3.3,0,153.44
+Plumbing,18.1,2.8,1,194.36
+Moving Help,18.7,4.3,1,177.04
+Cleaning,15.9,1.2,1,138.59
+Plumbing,15.6,3.4,0,182.44
+Delivery,7.1,4.3,0,96.37
+Moving Help,11.6,4.7,0,181.25
+Delivery,11.1,0.8,0,40.98
+Delivery,13.2,0.6,1,101.77
+Cleaning,6.6,4.4,1,117.01
+Plumbing,3.2,2.6,1,194.51
+Cleaning,14.2,4.2,1,179.69
+Cleaning,5.3,4.6,0,130.67
+Plumbing,17.1,4.2,0,198.69
+Moving Help,3.5,1.8,1,171.63
+Plumbing,6.0,0.7,0,80.78
+Plumbing,8.5,4.4,1,193.83
+Plumbing,4.6,4.0,1,185.65
+Moving Help,19.8,4.1,1,273.88
+Moving Help,9.3,1.4,0,138.12
+Delivery,17.4,4.5,1,143.17
+Cleaning,19.0,1.8,1,125.78
+Cleaning,3.1,3.7,0,86.03
+Plumbing,9.1,2.1,0,124.82
+Delivery,1.2,4.7,1,72.33
+Delivery,6.1,2.0,0,59.83
+Cleaning,17.8,1.3,1,154.85
+Plumbing,5.6,1.2,0,106.74
+Plumbing,12.5,2.6,1,152.56
+Moving Help,10.3,1.6,0,166.72
+Cleaning,2.4,3.5,0,105.61
+Plumbing,9.2,1.8,1,174.72
+Cleaning,6.4,3.2,0,139.26
+Delivery,11.0,1.9,0,59.7
+Cleaning,17.7,0.7,0,107.69
+Moving Help,4.7,2.0,0,131.69
+Delivery,7.5,2.0,1,94.67
+Moving Help,7.8,1.8,0,152.35
+Delivery,15.6,3.1,1,114.72
+Delivery,9.1,3.3,1,74.19
+Delivery,6.6,2.2,1,120.72
+Delivery,3.4,2.1,1,85.44
+Moving Help,10.6,0.8,1,151.59
+Moving Help,4.4,5.0,1,218.23
+Plumbing,12.6,3.0,0,136.95
+Cleaning,12.5,0.7,1,105.34
+Delivery,16.0,4.0,0,135.02
+Plumbing,2.3,4.4,1,147.98
+Cleaning,17.7,1.6,1,111.73
+Moving Help,6.3,3.7,1,191.94
+Moving Help,1.7,0.8,1,163.83
+Plumbing,8.1,2.9,0,92.09
+Cleaning,13.8,2.7,0,150.12
+Moving Help,7.8,3.6,1,145.06
+Delivery,16.8,1.9,1,86.65
+Moving Help,8.9,4.8,0,199.66
+Moving Help,8.5,1.7,1,183.03
+Plumbing,2.9,0.9,0,144.97
+Delivery,19.6,2.8,1,141.22
+Moving Help,3.4,0.7,1,132.0
+Delivery,2.1,1.7,1,88.53
+Plumbing,5.9,3.6,0,156.82
+Cleaning,18.1,0.8,0,123.41
+Moving Help,18.4,2.7,1,174.72
+Moving Help,13.4,3.0,1,207.73
+Moving Help,2.5,4.0,0,172.88
+Delivery,18.4,1.4,1,118.69
+Cleaning,2.5,0.6,1,114.02
+Delivery,19.4,4.9,0,107.6
+Cleaning,17.7,2.8,0,107.88
+Plumbing,1.5,4.4,1,197.12
+Plumbing,3.5,3.3,0,126.35
+Delivery,7.5,2.9,1,131.09
+Moving Help,10.2,3.3,0,149.74
+Plumbing,17.6,2.1,0,132.9
+Moving Help,13.8,2.8,0,193.2
+Cleaning,1.6,2.8,0,75.37
+Moving Help,3.5,4.2,0,156.23
+Cleaning,12.8,4.3,1,144.99
+Plumbing,18.2,4.9,0,153.07
+Delivery,13.6,2.8,0,92.05
+Plumbing,12.7,4.0,0,207.97
+Cleaning,10.1,2.1,1,153.44
+Cleaning,16.2,3.4,0,92.4
+Delivery,4.4,0.7,1,55.73
+Cleaning,13.8,1.8,0,126.99
+Plumbing,15.1,4.3,1,205.86
+Cleaning,4.6,1.7,1,136.49
+Moving Help,11.3,1.0,0,111.88
+Plumbing,10.5,4.5,0,145.37
+Cleaning,19.8,1.2,1,98.65
+Cleaning,9.6,2.4,0,92.23
+Moving Help,16.2,1.7,1,200.89
+Moving Help,8.6,2.9,1,179.48
+Delivery,9.3,4.6,1,144.97
+Plumbing,14.5,4.5,1,171.86
+Cleaning,3.1,3.9,1,101.98
+Moving Help,2.2,2.5,0,149.81
+Moving Help,6.1,4.5,0,164.42
+Delivery,19.9,1.8,0,77.53
+Moving Help,19.1,0.5,0,140.45
+Cleaning,8.7,4.5,1,165.12
+Plumbing,17.9,4.7,0,190.32
+Moving Help,8.5,4.3,0,146.4
+Cleaning,18.1,1.5,1,156.2
+Moving Help,16.9,3.3,0,181.68
+Delivery,1.0,0.5,1,63.34
+Plumbing,17.3,0.5,1,160.25
+Delivery,8.1,3.4,0,114.25
+Cleaning,14.4,2.1,0,134.37
+Delivery,10.7,1.7,1,96.43
+Delivery,7.7,0.7,0,58.61
+Plumbing,11.3,0.8,0,140.41
+Cleaning,15.0,4.4,1,179.47
+Moving Help,6.3,2.5,1,181.71
+Cleaning,7.5,1.6,1,135.34
+Delivery,15.1,3.0,0,78.7
+Cleaning,10.0,3.4,0,130.22
+Plumbing,11.7,1.4,0,140.79
+Moving Help,5.9,2.6,0,117.06
+Moving Help,17.6,3.3,0,171.83
+Delivery,8.9,4.3,1,140.19
+Delivery,15.6,1.8,1,109.25
+Moving Help,4.0,4.3,1,165.77
+Cleaning,11.7,1.4,1,80.13
+Plumbing,10.3,3.4,1,191.5
+Plumbing,3.9,4.6,0,119.12
+Moving Help,19.1,1.8,1,189.76
+Delivery,10.7,1.8,0,110.73
+Moving Help,17.4,1.3,1,172.08
+Cleaning,19.3,4.2,0,170.07
+Delivery,3.0,4.4,1,97.1
+Delivery,4.9,1.4,1,82.99
+Cleaning,6.1,4.4,1,95.83
+Delivery,4.2,0.9,1,96.49
+Delivery,6.7,2.8,0,44.47
+Plumbing,7.0,4.0,1,118.78
+Delivery,1.5,1.0,1,69.99
+Plumbing,15.8,1.4,0,114.49
+Delivery,3.7,1.1,1,87.76
+Cleaning,8.3,1.6,1,144.63
+Cleaning,5.0,4.2,1,109.26
+Plumbing,10.2,4.1,1,185.95
+Cleaning,19.5,3.5,1,142.76
+Delivery,18.9,1.4,0,121.73
+Delivery,14.2,1.5,0,95.8
+Cleaning,5.7,3.0,0,114.18
+Cleaning,7.6,1.3,1,123.43
+Plumbing,18.1,1.6,1,171.62
+Moving Help,1.5,2.8,0,166.39
+Delivery,17.4,2.5,1,112.5
+Delivery,13.2,1.2,1,105.47
+Cleaning,15.0,4.8,1,127.95
+Cleaning,12.6,0.9,1,113.22
+Moving Help,13.2,3.0,1,157.98
+Cleaning,3.8,0.6,1,110.65
+Moving Help,15.9,1.6,1,163.52
+Plumbing,16.9,4.4,1,190.26
+Moving Help,18.3,2.6,0,213.51
+Plumbing,6.4,3.6,0,153.62
+Plumbing,7.8,4.4,0,172.97
+Moving Help,17.0,4.5,0,205.38
+Cleaning,11.4,3.4,0,93.94
+Moving Help,17.0,1.4,0,153.46
+Moving Help,19.4,2.1,0,202.08
+Delivery,2.9,2.2,1,51.35
+Moving Help,4.7,2.5,0,130.34
+Plumbing,17.5,2.3,1,126.47
+Cleaning,8.6,3.1,1,155.37
+Cleaning,5.4,4.8,1,131.81
+Cleaning,19.4,1.7,1,157.15
+Cleaning,14.2,5.0,1,194.36
+Moving Help,16.4,1.6,1,216.39
+Cleaning,3.0,0.8,0,73.41
+Delivery,14.7,1.1,1,88.08
+Plumbing,15.4,1.0,0,149.23
+Cleaning,9.2,4.2,1,166.44
+Delivery,13.7,4.2,0,106.61
+Plumbing,11.8,2.0,0,113.18
+Moving Help,18.9,1.7,1,151.56
+Plumbing,9.5,3.9,0,180.75
+Delivery,7.7,3.8,1,121.53
+Plumbing,6.6,4.0,0,102.19
+Delivery,10.5,2.3,1,101.81
+Moving Help,8.7,2.9,1,197.54
+Delivery,19.7,0.9,0,79.7
+Delivery,15.8,1.7,1,111.44
+Cleaning,18.7,2.4,1,172.18
+Cleaning,17.6,3.8,1,159.52
+Cleaning,3.6,1.6,1,87.14
+Delivery,14.0,3.0,1,102.64
+Plumbing,11.2,3.5,0,160.57
+Cleaning,17.1,1.1,1,169.8
+Delivery,10.7,4.2,0,94.23
+Delivery,14.7,2.3,0,118.06
+Cleaning,16.6,3.3,1,169.83
+Moving Help,5.5,4.4,0,132.95
+Cleaning,4.4,3.1,0,96.43
+Plumbing,8.7,1.1,0,104.08
+Moving Help,4.5,1.9,1,159.41
+Delivery,1.3,4.7,0,92.36
+Moving Help,18.6,4.5,1,199.32
+Plumbing,2.6,3.3,0,120.52
+Cleaning,12.5,2.3,0,120.98
+Delivery,16.5,0.8,1,102.77
+Moving Help,8.1,1.4,0,111.37
+Plumbing,7.1,5.0,1,134.3
+Delivery,5.6,1.5,0,32.51
+Moving Help,19.1,2.9,1,202.85
+Moving Help,4.4,2.5,1,194.56
+Cleaning,19.7,4.9,1,141.05
+Delivery,3.4,4.6,1,141.35
+Cleaning,19.7,1.7,1,139.34
+Cleaning,11.2,4.8,1,144.97
+Delivery,19.9,0.7,1,138.4
+Delivery,13.9,0.7,1,65.07
+Delivery,19.0,0.7,1,112.18
+Plumbing,19.7,2.8,1,171.37
+Delivery,5.6,1.4,0,54.95
+Moving Help,4.7,4.1,0,184.94
+Delivery,7.0,1.2,1,89.29
+Moving Help,4.7,1.9,0,162.81
+Delivery,13.9,2.8,1,110.02
+Plumbing,4.9,1.0,1,160.27
+Moving Help,19.4,1.3,0,172.85
+Cleaning,4.9,3.4,0,78.16
+Delivery,4.5,1.1,1,83.66
+Moving Help,1.4,1.2,0,149.09
+Delivery,13.6,1.7,0,88.77
+Cleaning,5.3,0.8,0,69.58
+Moving Help,12.6,1.2,0,167.71
+Delivery,7.2,1.4,0,89.84
+Delivery,7.8,3.2,0,95.68
+Delivery,4.3,1.3,0,44.26
+Cleaning,13.6,4.6,1,133.66
+Cleaning,1.1,3.7,0,104.22
+Moving Help,10.6,2.1,0,138.49
+Plumbing,7.1,3.3,1,201.65
+Moving Help,4.8,4.8,0,230.09
+Delivery,14.9,0.7,0,70.18
+Delivery,12.7,1.5,1,109.84
+Cleaning,16.2,0.9,1,151.0
+Delivery,6.2,1.6,0,70.49
+Plumbing,10.4,2.5,0,140.92
+Cleaning,7.1,4.5,0,134.32
+Delivery,13.3,4.8,0,96.6
+Delivery,16.7,4.8,0,107.26
+Moving Help,15.1,2.2,1,231.79
+Delivery,11.1,4.7,0,114.9
+Delivery,10.5,4.9,1,101.65
+Cleaning,12.3,3.9,0,141.94
+Moving Help,15.2,2.2,1,204.4
+Delivery,13.5,4.3,1,100.87
+Cleaning,1.8,1.3,0,66.83
+Moving Help,3.6,4.6,0,158.3
+Plumbing,3.2,2.0,1,135.77
+Moving Help,6.2,4.4,1,196.08
+Moving Help,4.5,1.0,0,132.36
+Plumbing,17.1,2.3,0,116.24
+Delivery,2.2,0.5,0,73.57
+Moving Help,14.7,2.7,0,186.75
+Delivery,16.9,0.7,0,112.91
+Plumbing,8.7,0.8,0,106.11
+Plumbing,18.3,4.4,0,138.94
+Moving Help,18.5,2.6,0,180.09
+Delivery,18.1,3.5,0,119.81
+Cleaning,18.2,2.9,1,136.19
+Plumbing,13.2,4.7,1,251.22
+Delivery,9.1,4.4,0,115.15
+Cleaning,13.7,4.2,1,198.73
+Delivery,19.9,3.7,1,119.33
+Cleaning,17.1,3.3,0,149.28
+Delivery,12.7,1.7,0,87.67
+Moving Help,19.8,1.3,1,199.57
+Plumbing,12.6,3.8,0,160.21
+Cleaning,2.7,2.2,1,119.8
+Plumbing,9.2,1.6,1,171.16
+Plumbing,13.5,1.4,1,138.8
+Plumbing,11.6,2.9,1,196.32
+Plumbing,12.8,2.8,0,140.95
+Plumbing,12.5,2.5,1,134.02
+Delivery,1.2,4.0,0,90.13
+Delivery,16.2,2.8,1,106.99
+Delivery,9.4,1.3,1,90.37
+Moving Help,3.3,1.1,0,125.01
+Plumbing,10.8,1.2,0,148.25
+Delivery,15.7,1.4,0,65.79
+Delivery,11.1,0.6,1,83.49
+Delivery,11.2,0.7,1,91.36
+Plumbing,17.2,3.1,1,146.08
+Plumbing,14.2,4.2,1,184.63
+Moving Help,2.7,3.5,0,182.07
+Moving Help,1.8,1.5,1,158.14
+Cleaning,18.9,1.9,1,165.63
+Moving Help,3.3,2.8,0,154.02
+Cleaning,7.6,2.1,1,149.61
+Plumbing,18.6,2.1,0,168.85
+Cleaning,16.2,2.6,0,155.45
+Cleaning,17.4,2.3,1,152.57
+Delivery,1.6,3.1,0,65.39
+Cleaning,12.2,4.6,0,119.41
+Cleaning,14.4,0.5,1,120.29
+Delivery,9.4,1.7,0,75.92
+Cleaning,5.1,2.5,0,125.73
+Cleaning,18.2,1.4,0,119.86
+Plumbing,18.6,2.2,1,165.64
+Plumbing,19.9,1.6,0,183.61
+Cleaning,3.4,1.7,1,120.74
+Plumbing,8.9,2.0,1,149.9
+Plumbing,11.4,4.7,1,172.82
+Moving Help,15.5,0.8,1,185.66
+Plumbing,11.5,2.3,1,110.93
+Moving Help,19.6,4.7,1,241.24
+Cleaning,16.5,2.5,1,140.06
+Delivery,14.9,1.8,1,109.98
+Delivery,12.1,2.2,0,100.82
+Delivery,17.1,0.6,0,88.64
+Cleaning,7.0,3.6,1,173.05
+Moving Help,3.5,1.9,1,178.45
+Plumbing,4.0,2.5,1,171.98
+Moving Help,9.7,0.5,1,174.87
+Delivery,9.0,4.0,1,139.25
+Plumbing,11.3,2.5,0,153.51
+Moving Help,10.1,0.7,0,148.55
+Moving Help,3.3,4.6,1,205.81
+Delivery,1.0,2.9,1,83.17
+Plumbing,12.9,0.7,0,136.08
+Plumbing,2.7,4.4,1,197.47
+Delivery,11.1,1.4,0,66.89
+Moving Help,17.6,3.4,1,210.63
+Delivery,19.1,4.7,0,120.45
+Delivery,17.3,1.4,0,91.21
+Delivery,13.0,3.1,1,72.88
+Moving Help,1.9,2.2,1,158.87
+Moving Help,14.3,1.4,1,202.44
+Plumbing,4.9,4.9,0,130.9
+Plumbing,11.8,3.9,1,204.36
+Cleaning,8.5,0.5,1,113.4
+Plumbing,6.5,4.5,0,161.49
+Moving Help,10.1,2.8,0,184.82
+Delivery,4.2,3.8,0,70.62
+Plumbing,13.9,1.7,0,152.04
+Plumbing,10.9,1.1,1,133.43
+Plumbing,9.6,3.9,1,130.4
+Delivery,5.0,2.3,0,105.61
+Cleaning,16.2,2.6,0,125.88
+Moving Help,3.0,4.6,0,182.25
+Plumbing,2.4,3.9,1,156.95
+Delivery,19.3,4.2,0,132.49
+Cleaning,5.2,2.6,0,112.79
+Moving Help,5.4,2.5,1,173.73
+Cleaning,9.9,3.9,1,142.77
+Plumbing,2.1,1.1,1,138.52
+Delivery,19.9,2.0,1,100.46
+Delivery,6.1,3.3,0,70.69
+Moving Help,15.7,4.9,0,160.43
+Plumbing,1.5,3.5,0,120.89
+Delivery,17.3,3.0,0,106.08
+Delivery,2.4,3.0,0,105.88
+Moving Help,17.1,0.9,0,169.43
+Delivery,6.8,3.1,0,80.21
+Delivery,9.3,1.5,0,71.87
+Plumbing,1.3,2.3,1,134.85
+Delivery,3.6,4.6,1,114.64
+Delivery,14.3,0.7,0,72.39
+Moving Help,1.7,1.3,0,138.41
+Moving Help,1.4,4.8,1,227.87
+Plumbing,6.8,0.8,0,113.92
+Moving Help,8.5,4.6,0,219.83
+Delivery,16.5,3.4,1,112.71
+Delivery,10.9,4.7,1,124.37
+Plumbing,3.8,0.6,0,114.66
+Moving Help,15.9,4.7,1,246.0
+Cleaning,6.3,4.8,0,146.84
+Delivery,13.3,3.0,1,102.85
+Delivery,8.7,4.5,1,102.36
+Cleaning,15.0,2.1,0,126.58
+Moving Help,3.9,3.7,0,168.56
+Cleaning,8.0,1.3,0,115.39
+Cleaning,8.2,2.5,0,100.86
+Moving Help,14.5,4.8,0,209.05
+Plumbing,8.5,4.0,0,188.82
+Moving Help,8.6,1.2,1,144.3
+Cleaning,16.5,0.8,0,85.11
+Cleaning,12.6,1.1,0,93.88
+Cleaning,9.9,4.2,1,145.61
+Cleaning,3.8,1.1,0,70.52
+Moving Help,10.0,1.2,1,202.89
+Plumbing,3.5,1.4,1,104.01
+Cleaning,14.4,1.0,0,128.02
+Delivery,13.3,2.9,1,102.82
+Cleaning,15.0,3.6,0,156.19
+Cleaning,16.3,2.9,0,125.63
+Cleaning,4.0,4.7,1,128.92
+Plumbing,9.2,2.4,0,150.51
+Moving Help,18.5,4.5,0,188.92
+Plumbing,12.0,4.8,1,202.05
+Plumbing,7.3,1.6,0,157.1
+Delivery,2.9,2.6,0,88.03
+Plumbing,4.8,0.8,0,102.62
+Delivery,18.2,4.8,0,147.54
+Cleaning,6.9,1.6,0,70.3
+Cleaning,16.7,2.6,1,109.24
+Moving Help,3.3,1.0,1,161.01
+Moving Help,14.5,4.3,0,175.71
+Plumbing,7.3,3.6,1,175.75
+Moving Help,10.0,4.5,0,159.42
+Plumbing,1.4,2.0,0,104.7
+Delivery,15.6,0.5,1,101.92
+Moving Help,8.0,2.0,1,183.43
+Delivery,11.7,4.6,1,114.35
+Moving Help,9.4,3.4,0,173.58
+Delivery,16.3,4.8,0,121.08
+Delivery,4.8,0.6,1,75.52
+Delivery,12.8,2.8,1,119.01
+Moving Help,1.7,1.6,1,126.84
+Cleaning,1.4,1.8,1,130.19
+Plumbing,17.4,0.6,1,154.72
+Cleaning,4.6,5.0,0,127.16
+Cleaning,13.9,1.2,0,97.85
+Plumbing,6.2,3.1,1,137.66
+Plumbing,3.9,4.4,1,177.3
+Plumbing,3.8,3.7,1,161.27
+Cleaning,1.1,1.8,1,115.47
+Cleaning,9.2,3.5,1,123.08
+Delivery,16.4,1.3,0,92.06
+Moving Help,11.5,1.1,1,160.38
+Cleaning,2.1,2.6,1,112.93
+Delivery,7.3,4.0,1,125.11
+Cleaning,7.8,4.9,0,144.24
+Plumbing,17.0,3.7,0,150.38
+Moving Help,19.7,2.9,1,230.99
+Cleaning,17.6,1.6,1,161.37
+Cleaning,3.2,1.4,1,117.64
+Delivery,14.4,2.8,0,114.62
+Plumbing,2.5,2.3,0,134.08
+Cleaning,8.2,3.5,0,105.79
+Plumbing,13.1,0.8,0,166.05
+Delivery,16.3,4.1,1,125.56
+Delivery,6.2,1.4,0,68.29
+Delivery,14.4,2.7,1,125.51
+Plumbing,2.2,2.8,1,141.35
+Cleaning,1.2,1.4,1,82.28
+Plumbing,12.4,2.7,1,200.12
+Cleaning,14.1,5.0,1,157.75
+Cleaning,16.7,5.0,0,137.07
+Cleaning,11.3,4.4,0,118.47
+Moving Help,8.2,0.6,1,184.09
+Moving Help,7.7,4.9,0,162.23
+Moving Help,18.9,1.3,0,143.97
+Cleaning,14.2,0.6,0,115.63
+Cleaning,17.7,4.7,0,193.02
+Delivery,8.9,1.4,0,59.38
+Moving Help,19.6,1.7,0,137.09
+Cleaning,16.7,2.5,1,113.26
+Delivery,4.3,3.7,0,69.18
+Delivery,3.1,1.1,1,72.76
+Delivery,1.3,4.9,0,91.22
+Moving Help,7.2,2.0,0,161.09
+Moving Help,17.6,4.8,1,210.05
+Moving Help,7.6,4.2,1,239.57
+Moving Help,10.9,2.2,1,188.82
+Moving Help,2.7,4.7,1,154.08
+Cleaning,3.6,2.6,1,77.36
+Plumbing,10.8,0.6,0,112.85
+Delivery,3.2,4.6,0,104.1
+Delivery,12.7,1.8,0,87.65
+Plumbing,3.5,1.5,0,126.89
+Delivery,18.2,2.7,0,130.85
+Delivery,14.8,0.6,1,113.57
+Cleaning,19.4,3.0,1,118.07
+Delivery,15.1,3.9,0,94.76
+Moving Help,3.9,2.9,0,140.2
+Moving Help,12.5,3.1,1,157.5
+Delivery,8.8,4.3,0,80.43
+Moving Help,19.1,1.7,0,175.83
+Cleaning,12.9,0.6,1,107.66
+Delivery,17.3,3.7,1,130.25
+Plumbing,15.8,4.4,1,193.75
+Cleaning,17.9,2.4,1,147.62
+Delivery,18.2,0.8,1,88.26
+Cleaning,9.1,0.6,1,117.02
+Plumbing,12.4,4.6,1,237.86
+Moving Help,2.6,0.9,0,91.57
+Cleaning,7.8,3.0,0,112.91
+Moving Help,2.4,2.0,1,149.16
+Delivery,15.4,2.8,0,119.77
+Plumbing,11.3,3.0,1,114.53
+Plumbing,16.1,2.2,0,185.78
+Moving Help,7.6,4.9,1,179.24
+Moving Help,2.3,1.1,1,127.17
+Delivery,4.8,1.7,1,117.18
+Delivery,14.1,3.2,0,123.65
+Cleaning,3.2,3.9,0,106.05
+Cleaning,12.8,3.6,1,133.85
+Moving Help,13.1,1.9,0,156.85
+Delivery,1.2,3.3,0,74.24
+Plumbing,5.8,1.8,1,179.97
+Plumbing,7.8,3.9,0,160.02
+Cleaning,18.8,2.5,1,128.56
+Delivery,16.6,3.1,1,88.67
+Plumbing,18.4,3.8,0,147.69
+Cleaning,11.0,4.4,0,135.27
+Cleaning,9.8,1.7,1,135.14
+Delivery,4.7,3.2,0,64.42
+Plumbing,18.7,3.1,1,166.33
+Moving Help,20.0,3.4,1,202.65
+Cleaning,11.8,2.5,1,151.16
+Plumbing,13.2,2.0,1,189.64
+Delivery,6.1,4.4,1,112.4
+Plumbing,9.7,1.2,1,118.81
+Delivery,17.9,3.1,1,175.42
+Cleaning,17.8,1.6,1,133.08
+Moving Help,14.6,1.8,0,176.62
+Moving Help,6.8,3.6,1,207.62
+Delivery,10.0,1.0,1,100.86
+Delivery,17.6,2.7,0,103.67
+Cleaning,16.6,4.9,1,174.95
+Plumbing,15.8,0.9,0,130.92
+Moving Help,6.9,3.0,1,151.41
+Delivery,11.2,0.7,1,76.88
+Plumbing,9.9,0.7,1,175.63
+Cleaning,2.2,2.2,0,76.53
+Delivery,3.1,4.0,1,139.46
+Delivery,10.1,2.1,0,82.71
+Plumbing,15.4,3.8,0,161.56
+Plumbing,16.9,1.7,1,164.51
+Delivery,18.8,4.7,0,114.45
+Plumbing,13.3,2.4,1,117.13
+Delivery,16.4,2.5,0,76.76
+Moving Help,8.6,4.7,0,192.1
+Plumbing,10.1,2.6,1,152.88
+Delivery,11.9,3.4,1,119.72
+Plumbing,6.1,2.0,0,92.48
+Cleaning,5.6,1.3,1,101.81
+Plumbing,1.1,1.3,1,106.65
+Moving Help,15.5,2.9,0,127.96
+Cleaning,14.2,2.8,1,166.9
+Delivery,11.4,0.9,1,106.16
+Delivery,16.7,3.9,1,140.63
+Delivery,4.0,4.1,0,67.21
+Moving Help,8.0,3.4,1,169.63
+Delivery,4.7,4.3,0,110.05
+Delivery,11.7,1.4,1,101.68
+Plumbing,1.4,3.3,1,173.31
+Delivery,19.0,1.1,1,123.13
+Plumbing,19.0,3.8,1,179.47
+Cleaning,1.0,1.4,0,71.68
+Delivery,12.7,2.0,0,85.24
+Delivery,12.5,4.9,0,153.18
+Moving Help,10.0,4.4,1,175.87
+Plumbing,1.1,4.5,0,143.78
+Plumbing,19.9,3.3,0,167.63
+Plumbing,7.0,2.0,0,128.16
+Plumbing,10.9,3.0,0,144.19
+Plumbing,8.8,2.4,1,129.31
+Plumbing,10.6,1.2,0,135.53
+Moving Help,12.1,1.3,0,171.86
+Moving Help,17.2,4.3,0,182.75
+Cleaning,17.9,3.8,1,160.87
+Plumbing,10.9,3.7,0,177.41
+Moving Help,14.3,2.9,1,182.12
+Cleaning,19.7,4.6,1,219.47
+Moving Help,13.4,4.6,1,197.13
+Delivery,4.8,3.5,0,102.26
+Delivery,16.7,1.4,0,91.68
+Moving Help,2.3,1.1,0,124.78
+Moving Help,12.2,0.6,1,115.99
+Moving Help,2.0,2.2,1,143.96
+Delivery,19.8,3.2,1,153.21
+Plumbing,5.0,3.6,0,118.41
+Moving Help,13.5,0.7,0,173.63
+Delivery,3.1,3.8,0,107.4
+Plumbing,6.5,3.7,0,176.08
+Delivery,15.1,4.2,1,154.11
+Plumbing,10.8,4.3,1,165.91
+Cleaning,3.4,4.6,0,108.78
+Delivery,8.2,3.8,0,102.06
+Plumbing,13.1,3.7,1,217.75
+Plumbing,3.7,2.9,1,142.26
+Moving Help,6.8,1.2,0,128.69
+Delivery,13.2,1.2,1,114.58
+Plumbing,7.2,3.9,1,146.03
+Moving Help,16.1,3.3,1,181.38
+Moving Help,4.3,3.9,1,194.79
