@@ -1,50 +1,97 @@
-# Welcome to your Expo app 👋
+# IoT GPS Tracker
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple GPS tracking prototype built with Expo and React Native.
 
-## Get started
+The application collects multiple GPS samples and applies a smoothing algorithm to improve location accuracy.
 
-1. Install dependencies
+## Features
+* High accuracy GPS sampling
+* Multiple GPS readings
+* Outlier detection
+* Median filtering
+* Average smoothing
+* Distance calculation between employee and guest
+* Optional API upload
 
-   ```bash
-   npm install
-   ```
+## How It Works
+1. Guest captures and adjusts location on the map.
+2. The app collects multiple GPS samples and smooths the result.
+3. Guest location is saved (simulated or from server).
+4. Employee captures their current GPS location.
+5. The system calculates distance between employee and guest.
+6. If distance ≤ 50m → success, otherwise show remaining distance.
 
-2. Start the app
+## Screens
+1. GuestScreen
+Capture GPS location
+Display location on map
+Allow long press or drag marker to adjust position
+Automatically convert coordinates to address
 
-   ```bash
-   npx expo start
-   ```
+2. EmployeeScreen
+Capture current GPS location
+Compare with guest location
+Calculate distance
+Show alert if reached or remaining distance
 
-In the output, you'll find options to open the app in a
+## Project Structure
+app/index.tsx
+Main entry of the app.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+app/GuestScreen.tsx
+UI for guest to select and adjust location.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+app/EmployeeScreen.tsx
+UI for employee to check distance to guest.
 
-## Get a fresh project
+src/config/constants.js
+Global configuration (sample count, delay, etc.).
 
-When you're ready, run:
+src/services/locationService.js
+Handles GPS sampling, smoothing, and distance calculation.
 
-```bash
-npm run reset-project
-```
+src/services/apiService.js
+Handles sending data to backend (optional).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+src/utils/smoothing.js
+Implements filtering and averaging algorithm.
 
-## Learn more
+## Installation
+Install dependencies:
 
-To learn more about developing your project with Expo, look at the following resources:
+npm install
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Run the project:
 
-## Join the community
+npx expo start
 
-Join our community of developers creating universal apps.
+## How to Use
+Open the app
+Allow location permission
+Go to Guest screen → set location
+Go to Employee screen → press Check GPS
+View result
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Example Output
+[PRESS BUTTON]
+Starting high accuracy GPS capture
+Collecting samples...
+Filtering noise...
+Final Location: { latitude: ..., longitude: ... }
+
+Distance: 32m
+→ Guest location reached
+
+## Technologies
+* React Native
+* Expo
+* JavaScript
+* Haversine distance formula
+* GPS/Location API
+
+# Permissions
+The app requires location permission to work properly.
+If permission is denied, GPS cannot be accessed.
+
+## License
+MIT

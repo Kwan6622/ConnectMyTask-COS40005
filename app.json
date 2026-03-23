@@ -9,7 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location"
+        ],
+        "NSLocationWhenInUseUsageDescription": "Location required for tracking.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Location required in background."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,8 +24,17 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "FOREGROUND_SERVICE"
+      ],
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.iottracker"
     },
     "web": {
       "output": "static",
