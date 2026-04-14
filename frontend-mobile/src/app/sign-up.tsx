@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Redirect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AIAssistantButton } from "@/components/AIAssistantButton";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { useAuthStore } from "@/store/authStore";
+import { useResponsiveLayout } from "@/theme/responsive";
 import { colors, radius } from "@/theme/tokens";
 import { AccountType } from "@/types";
 
@@ -59,6 +61,7 @@ function validateSignUp({
 
 export default function SignUpScreen(): React.ReactElement {
   const router = useRouter();
+  const { isCompact, isTablet, contentMaxWidth } = useResponsiveLayout();
   const signUp = useAuthStore((state) => state.signUp);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
@@ -96,7 +99,7 @@ export default function SignUpScreen(): React.ReactElement {
         password,
       });
 
-      router.replace("/");
+      router.replace("/browse-tasks");
     } catch (error) {
       console.error("Sign up failed", error);
       setFormError("Sign up failed. Please try again.");
@@ -106,23 +109,24 @@ export default function SignUpScreen(): React.ReactElement {
   };
 
   if (isAuthenticated) {
-    return <Redirect href="/" />;
+    return <Redirect href="/browse-tasks" />;
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.safeArea}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
-            <View style={styles.heroGlowOne} />
-            <View style={styles.heroGlowTwo} />
-            <Badge label="Create account" variant="primary" />
-            <Text style={styles.title}>Sign Up</Text>
-            <Text style={styles.subtitle}>Join as a client or service provider and sync with web instantly.</Text>
-          </View>
+          <View style={[styles.contentWrap, { maxWidth: contentMaxWidth }]}>
+            <View style={styles.header}>
+              <View style={styles.heroGlowOne} />
+              <View style={styles.heroGlowTwo} />
+              <Badge label="Create account" variant="primary" />
+              <Text style={[styles.title, isCompact ? styles.titleCompact : null]}>Sign Up</Text>
+              <Text style={styles.subtitle}>Join as a client or service provider and sync with web instantly.</Text>
+            </View>
 
-          <Card>
-            <View style={styles.form}>
+            <Card>
+              <View style={styles.form}>
               <Input
                 label="Full Name"
                 placeholder="Your full name"
@@ -151,7 +155,7 @@ export default function SignUpScreen(): React.ReactElement {
               />
 
               <View style={styles.radioSection}>
-                <Text style={styles.radioLabel}>Account Type</Text>
+                <Text style={styles.radioLabel}>I am a:</Text>
                 <View style={styles.radioGroup}>
                   {accountTypeOptions.map((option) => {
                     const selected = accountType === option.value;
@@ -159,7 +163,11 @@ export default function SignUpScreen(): React.ReactElement {
                       <Pressable
                         key={option.value}
                         onPress={() => setAccountType(option.value)}
-                        style={[styles.radioOption, selected ? styles.radioOptionSelected : null]}
+                        style={[
+                          styles.radioOption,
+                          isTablet ? styles.radioOptionTablet : null,
+                          selected ? styles.radioOptionSelected : null,
+                        ]}
                       >
                         <View style={[styles.radioOuter, selected ? styles.radioOuterSelected : null]}>
                           {selected ? <View style={styles.radioInner} /> : null}
@@ -179,6 +187,7 @@ export default function SignUpScreen(): React.ReactElement {
                 value={password}
                 onChangeText={setPassword}
                 error={errors.password}
+                helperText="At least 6 characters"
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -205,9 +214,11 @@ export default function SignUpScreen(): React.ReactElement {
                   <Text style={styles.footerLink}>Sign In</Text>
                 </Pressable>
               </View>
-            </View>
-          </Card>
+              </View>
+            </Card>
+          </View>
         </ScrollView>
+        <AIAssistantButton />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -224,6 +235,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     paddingBottom: 28,
+    gap: 14,
+  },
+  contentWrap: {
+    width: "100%",
+    alignSelf: "center",
     gap: 14,
   },
   header: {
@@ -257,6 +273,10 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: "800",
   },
+  titleCompact: {
+    fontSize: 26,
+    lineHeight: 32,
+  },
   subtitle: {
     fontSize: 14,
     lineHeight: 20,
@@ -275,6 +295,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   radioGroup: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   radioOption: {
@@ -287,6 +309,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    width: "100%",
+  },
+  radioOptionTablet: {
+    width: "48.8%",
   },
   radioOptionSelected: {
     borderColor: colors.primary[500],

@@ -1,567 +1,685 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
-import { Redirect, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Badge } from "@/components/Badge";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { MarketplaceShell } from "@/components/MarketplaceShell";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { Input } from "@/components/Input";
 import { TaskCard } from "@/components/TaskCard";
-import { SORT_OPTIONS } from "@/constants/tasks";
-import { useTaskStore } from "@/store/taskStore";
+import { BROWSE_STATUS_OPTIONS, TASK_CATEGORIES } from "@/constants/tasks";
 import { useAuthStore } from "@/store/authStore";
+import { useTaskStore } from "@/store/taskStore";
 import { colors, radius } from "@/theme/tokens";
-import { Task, TaskSortBy } from "@/types";
-import { formatCategoryLabel, formatTaskStatusLabel, isTaskActive, normalizeTaskStatus } from "@/utils/taskUtils";
-
-type CategoryFilter = "ALL" | string;
-type StatusFilter = "ALL" | string;
-
-const LOCATION_OPTIONS = [
-  "",
-  "District 1",
-  "District 2",
-  "District 3",
-  "District 4",
-  "District 5",
-  "District 6",
-  "District 7",
-  "District 8",
-  "District 9",
-  "District 10",
-  "District 11",
-  "District 12",
-  "Binh Thanh",
-  "Phu Nhuan",
-  "Go Vap",
-  "Tan Binh",
-  "Tan Phu",
-  "Thu Duc",
-];
+import { TaskStatus } from "@/types";
+import {
+  formatCategoryLabel,
+  getTaskDisplayBudget,
+  getVisiblePages,
+  isTaskActive,
+  isTaskBrowsable,
+} from "@/utils/taskUtils";
 
 export default function BrowseTasksScreen(): React.ReactElement {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const columns = width >= 720 ? 2 : 1;
+  const itemsPerPage = columns * 4;
+  const params = useLocalSearchParams<{ q?: string; mode?: string }>();
+  const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const { tasks, isLoading, error, fetchTasks } = useTaskStore((state) => ({
+  const {
+    tasks,
+    suggestedTasks,
+    savedTaskIds,
+    isLoading,
+    fetchTasks,
+    fetchSuggestedTasks,
+    saveTask,
+    unsaveTask,
+  } = useTaskStore((state) => ({
     tasks: state.tasks,
+    suggestedTasks: state.suggestedTasks,
+    savedTaskIds: state.savedTaskIds,
     isLoading: state.isLoading,
-    error: state.error,
     fetchTasks: state.fetchTasks,
+    fetchSuggestedTasks: state.fetchSuggestedTasks,
+    saveTask: state.saveTask,
+    unsaveTask: state.unsaveTask,
   }));
+  const isProviderUser = String(user?.role || "").toUpperCase() === "PROVIDER";
+  const browseMode = isProviderUser && params.mode === "suggested" ? "suggested" : "all";
 
-  const [searchText, setSearchText] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<TaskSortBy>("most_recent");
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("ALL");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [minBudget, setMinBudget] = useState("");
-  const [maxBudget, setMaxBudget] = useState("");
+  const [draftSearch, setDraftSearch] = useState(typeof params.q === "string" ? params.q : "");
+  const [draftStatus, setDraftStatus] = useState<"ALL" | TaskStatus>("ALL");
+  const [draftBudget, setDraftBudget] = useState("");
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [appliedSearch, setAppliedSearch] = useState(typeof params.q === "string" ? params.q : "");
+  const [appliedStatus, setAppliedStatus] = useState<"ALL" | TaskStatus>("ALL");
+  const [appliedBudget, setAppliedBudget] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<"ALL" | string>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
+    if (browseMode === "suggested") {
+      void fetchSuggestedTasks();
+      return;
+    }
     void fetchTasks();
-  }, [fetchTasks]);
+  }, [browseMode, fetchSuggestedTasks, fetchTasks]);
 
-  const categories = useMemo(() => {
-    const counts = new Map<string, number>();
-    tasks.forEach((task) => {
-      counts.set(task.category, (counts.get(task.category) || 0) + 1);
-    });
-    return Array.from(counts.entries())
-      .map(([value, count]) => ({ value, label: formatCategoryLabel(value), count }))
-      .sort((a, b) => b.count - a.count);
-  }, [tasks]);
+  useEffect(() => {
+    if (typeof params.q === "string") {
+      setDraftSearch(params.q);
+      setAppliedSearch(params.q);
+      setCurrentPage(1);
+    }
+  }, [params.q]);
 
-  const statuses = useMemo(() => {
-    const counts = new Map<string, number>();
-    tasks.forEach((task) => {
-      const normalized = normalizeTaskStatus(task.status);
-      counts.set(normalized, (counts.get(normalized) || 0) + 1);
-    });
-    return Array.from(counts.entries())
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count);
-  }, [tasks]);
+  const sourceTasks = browseMode === "suggested" ? suggestedTasks : tasks;
+  const browseVisibleTasks = useMemo(() => sourceTasks.filter((task) => isTaskBrowsable(task)), [sourceTasks]);
+
+  const categories = useMemo(
+    () =>
+      TASK_CATEGORIES.map((category) => ({
+        value: category,
+        label: formatCategoryLabel(category),
+        count: browseVisibleTasks.filter((task) => String(task.category) === category && isTaskActive(task.status)).length,
+      })),
+    [browseVisibleTasks]
+  );
 
   const filteredTasks = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
-    const min = minBudget ? Number(minBudget) : undefined;
-    const max = maxBudget ? Number(maxBudget) : undefined;
-    const selectedLocation = locationFilter.trim().toLowerCase();
+    const query = appliedSearch.trim().toLowerCase();
+    const ceiling = appliedBudget ? Number(appliedBudget) : undefined;
 
-    const list = tasks.filter((task) => {
-      const matchesSearch =
-        !query ||
-        task.title.toLowerCase().includes(query) ||
-        task.description.toLowerCase().includes(query);
-
-      const matchesLocation =
-        !selectedLocation || task.location.toLowerCase().includes(selectedLocation);
+    return browseVisibleTasks.filter((task) => {
+      const budget = getTaskDisplayBudget(task);
+      const normalizedTitle = String(task.title || "").toLowerCase();
+      const normalizedDescription = String(task.description || "").toLowerCase();
+      const matchesSearch = !query || normalizedTitle.includes(query) || normalizedDescription.includes(query);
+      const matchesStatus = appliedStatus === "ALL" || task.status === appliedStatus;
       const matchesCategory = categoryFilter === "ALL" || task.category === categoryFilter;
-      const matchesStatus = statusFilter === "ALL" || normalizeTaskStatus(task.status) === statusFilter;
-      const matchesMin = typeof min !== "number" || Number.isNaN(min) ? true : (task.aiSuggestedPrice ?? task.budget) >= min;
-      const matchesMax = typeof max !== "number" || Number.isNaN(max) ? true : (task.aiSuggestedPrice ?? task.budget) <= max;
+      const matchesBudget =
+        !ceiling || Number.isNaN(ceiling) || ceiling <= 0 ? true : budget <= ceiling;
 
-      return matchesSearch && matchesLocation && matchesCategory && matchesStatus && matchesMin && matchesMax;
+      return matchesSearch && matchesStatus && matchesCategory && matchesBudget;
     });
+  }, [appliedBudget, appliedSearch, appliedStatus, browseVisibleTasks, categoryFilter]);
 
-    const sorted = [...list];
-    sorted.sort((a, b) => {
-      const budgetA = a.aiSuggestedPrice ?? a.budget;
-      const budgetB = b.aiSuggestedPrice ?? b.budget;
-      if (sortBy === "price_low_to_high") return budgetA - budgetB;
-      if (sortBy === "price_high_to_low") return budgetB - budgetA;
-      if (sortBy === "deadline") {
-        const aValue = a.deadline ? new Date(a.deadline).getTime() : Number.POSITIVE_INFINITY;
-        const bValue = b.deadline ? new Date(b.deadline).getTime() : Number.POSITIVE_INFINITY;
-        return aValue - bValue;
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+  const pageCount = Math.max(1, Math.ceil(filteredTasks.length / itemsPerPage));
+  const safePage = Math.min(currentPage, pageCount);
+  const paginatedTasks = filteredTasks.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage);
+  const visiblePages = getVisiblePages(safePage, pageCount);
+  const activeTasks = useMemo(() => browseVisibleTasks.filter((task) => isTaskActive(task.status)).length, [browseVisibleTasks]);
 
-    return sorted;
-  }, [tasks, searchText, locationFilter, categoryFilter, statusFilter, minBudget, maxBudget, sortBy]);
-
-  const activeCount = useMemo(() => {
-    return filteredTasks.filter((task) => isTaskActive(task.status)).length;
-  }, [filteredTasks]);
-
-  const clearFilters = (): void => {
-    setCategoryFilter("ALL");
-    setStatusFilter("ALL");
-    setSearchText("");
-    setLocationFilter("");
-    setLocationOpen(false);
-    setMinBudget("");
-    setMaxBudget("");
+  const applyFilters = (): void => {
+    setAppliedSearch(draftSearch);
+    setAppliedStatus(draftStatus);
+    setAppliedBudget(draftBudget);
+    setCurrentPage(1);
+    setStatusMenuOpen(false);
   };
 
-  if (!isAuthenticated) {
-    return <Redirect href="/sign-in" />;
-  }
+  const resetFilters = (): void => {
+    setDraftSearch("");
+    setDraftStatus("ALL");
+    setDraftBudget("");
+    setAppliedSearch("");
+    setAppliedStatus("ALL");
+    setAppliedBudget("");
+    setCategoryFilter("ALL");
+    setCurrentPage(1);
+    setStatusMenuOpen(false);
+  };
+
+  const adjustBudget = (delta: number): void => {
+    const currentValue = Number(draftBudget || 0);
+    const nextValue = Math.max(0, currentValue + delta);
+    setDraftBudget(nextValue === 0 ? "" : String(Math.round(nextValue)));
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={() => void fetchTasks()} />}
-      >
-        <View style={styles.hero}>
-          <View style={styles.heroGlowOne} />
-          <View style={styles.heroGlowTwo} />
-          <View style={styles.heroTop}>
-            <Button title="Return" variant="ghost" size="sm" onPress={() => router.push("/")} />
-            <Badge label="Find Your Perfect Task" variant="primary" />
-          </View>
+    <MarketplaceShell
+      activeRoute={browseMode === "suggested" ? "suggested" : "browse"}
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoading}
+          onRefresh={() => (browseMode === "suggested" ? void fetchSuggestedTasks() : void fetchTasks())}
+        />
+      }
+    >
+      <View style={styles.heroCard}>
+        <Text style={styles.heroEyebrow}>Trusted marketplace for daily tasks</Text>
+        <Text style={styles.heroTitle}>Find skilled helpers fast, with clear budgets and verified task flow</Text>
+        <Text style={styles.heroBody}>
+          Browse available tasks, filter by status and budget, and connect with trusted providers in Ho Chi Minh City.
+        </Text>
 
-          <Text style={styles.heroTitle}>Browse Available Tasks</Text>
-          <Text style={styles.heroSubtitle}>
-            Explore available tasks and connect with trusted task posters in your area.
-          </Text>
+        <View style={styles.heroStatsRow}>
+          <HeroStat value={`${activeTasks} live`} label="Real-time updates" />
+          <HeroStat value={`${browseVisibleTasks.length}`} label={browseMode === "suggested" ? "Suggested tasks" : "Total listed tasks"} />
+          <HeroStat value={`${filteredTasks.length}`} label="Matching your filters" />
+          <HeroStat
+            value={columns === 1 ? "Mobile-first layout" : "Large-screen layout"}
+            label={`Showing ${columns} column${columns > 1 ? "s" : ""}`}
+            subLabel="Readable spacing, cleaner hierarchy, and consistent card rhythm."
+          />
+        </View>
+      </View>
 
-          <View style={styles.searchStack}>
-            <Input
-              placeholder="What are you looking for?"
-              value={searchText}
-              onChangeText={setSearchText}
-              style={styles.heroInputWrap}
+      <Card style={styles.filterCard}>
+        <View style={styles.filterUpperRow}>
+          <View style={styles.filterBlockWide}>
+            <Text style={styles.filterLabel}>Search</Text>
+            <TextInput
+              placeholder="Search by task name"
+              placeholderTextColor={colors.dark[400]}
+              value={draftSearch}
+              onChangeText={setDraftSearch}
+              style={styles.input}
             />
-
-            <View style={styles.locationWrap}>
-              <Pressable onPress={() => setLocationOpen((prev) => !prev)} style={styles.locationButton}>
-                <Text style={[styles.locationText, !locationFilter ? styles.locationTextPlaceholder : null]}>
-                  {locationFilter || "All locations"}
-                </Text>
-                <Text style={styles.locationArrow}>{locationOpen ? "▲" : "▼"}</Text>
-              </Pressable>
-
-              {locationOpen ? (
-                <View style={styles.locationMenu}>
-                  <ScrollView nestedScrollEnabled style={styles.locationMenuScroll}>
-                    {LOCATION_OPTIONS.map((location) => {
-                      const selected = location === locationFilter;
-                      return (
-                        <Pressable
-                          key={location || "all"}
-                          onPress={() => {
-                            setLocationFilter(location);
-                            setLocationOpen(false);
-                          }}
-                          style={[styles.locationOption, selected ? styles.locationOptionSelected : null]}
-                        >
-                          <Text style={[styles.locationOptionText, selected ? styles.locationOptionTextSelected : null]}>
-                            {location || "All locations"}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              ) : null}
-            </View>
-
-            <Button title="Search Tasks" onPress={() => setLocationOpen(false)} />
           </View>
 
-          <View style={styles.heroStats}>
-            <Text style={styles.heroStatText}>{activeCount} active tasks</Text>
-            <Text style={styles.heroStatText}>Verified posters</Text>
+          <View style={styles.filterBlock}>
+            <Text style={styles.filterLabel}>Status</Text>
+            <Pressable style={styles.dropdownButton} onPress={() => setStatusMenuOpen((current) => !current)}>
+              <Text style={styles.dropdownButtonText}>
+                {BROWSE_STATUS_OPTIONS.find((item) => item.value === draftStatus)?.label || "All Status"}
+              </Text>
+              <Text style={styles.dropdownChevron}>▾</Text>
+            </Pressable>
+            {statusMenuOpen ? (
+              <View style={styles.dropdownMenu}>
+                <ScrollView nestedScrollEnabled style={styles.dropdownScroll}>
+                  {BROWSE_STATUS_OPTIONS.map((option) => (
+                    <Pressable
+                      key={option.value}
+                      onPress={() => {
+                        setDraftStatus(option.value);
+                        setStatusMenuOpen(false);
+                      }}
+                      style={[
+                        styles.dropdownItem,
+                        option.value === draftStatus ? styles.dropdownItemActive : null,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.dropdownItemText,
+                          option.value === draftStatus ? styles.dropdownItemTextActive : null,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+          </View>
+
+          <View style={styles.filterBlock}>
+            <Text style={styles.filterLabel}>Budget</Text>
+            <View style={styles.moneyRow}>
+              <Pressable style={styles.moneyButton} onPress={() => adjustBudget(-10)}>
+                <Text style={styles.moneyButtonText}>-</Text>
+              </Pressable>
+              <TextInput
+                placeholder="Max budget"
+                placeholderTextColor={colors.dark[400]}
+                keyboardType="numeric"
+                value={draftBudget}
+                onChangeText={setDraftBudget}
+                style={styles.moneyInput}
+              />
+              <Pressable style={styles.moneyButton} onPress={() => adjustBudget(10)}>
+                <Text style={styles.moneyButtonText}>+</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <Button title="Apply" size="sm" onPress={applyFilters} style={styles.ctaButton} />
+          <Button title="Reset" size="sm" variant="outline" onPress={resetFilters} style={styles.ctaButton} />
+        </View>
+
+        <View style={styles.categoryHeader}>
+          <View>
+            <Text style={styles.categoryTitle}>Explore Categories</Text>
+            <Text style={styles.categoryTip}>Click to filter quickly</Text>
+          </View>
+        </View>
+        <View style={styles.categoryRow}>
+          <CategoryChip
+            label="All"
+            count={activeTasks}
+            active={categoryFilter === "ALL"}
+            onPress={() => {
+              setCategoryFilter("ALL");
+              setCurrentPage(1);
+            }}
+          />
+          {categories.map((category) => (
+            <CategoryChip
+              key={category.value}
+              label={category.label}
+              count={category.count}
+              active={categoryFilter === category.value}
+              onPress={() => {
+                setCategoryFilter(category.value);
+                setCurrentPage(1);
+              }}
+            />
+          ))}
+        </View>
+      </Card>
+
+      <Card style={styles.resultsCard}>
+        <View style={styles.resultsHeader}>
+          <View>
+            <Text style={styles.resultsTitle}>Showing {filteredTasks.length} tasks</Text>
+            <Text style={styles.resultsSubtitle}>
+              Page {safePage} of {pageCount}. Up to {itemsPerPage} task{itemsPerPage > 1 ? "s" : ""} per page.
+            </Text>
           </View>
         </View>
 
-        <Card style={styles.topCard}>
-          <View style={styles.topRow}>
-            <View>
-              <Text style={styles.resultTitle}>{filteredTasks.length} Tasks Found</Text>
-              <Text style={styles.resultSubTitle}>Showing all available tasks</Text>
-            </View>
-            <Badge label={`Sort: ${SORT_OPTIONS.find((s) => s.value === sortBy)?.label || "Most Recent"}`} variant="neutral" />
-          </View>
-          <View style={styles.chipWrap}>
-            {SORT_OPTIONS.map((option) => {
-              const selected = sortBy === option.value;
-              return (
-                <Button
-                  key={option.value}
-                  title={option.label}
-                  variant={selected ? "primary" : "outline"}
-                  size="sm"
-                  onPress={() => setSortBy(option.value)}
-                  style={styles.smallChip}
-                />
-              );
-            })}
-          </View>
-        </Card>
-
-        <Card
-          title="Filters"
-          actions={<Button title="Clear" variant="ghost" size="sm" onPress={clearFilters} />}
-          style={styles.topCard}
-        >
-          <View style={styles.filters}>
-            <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Categories</Text>
-              <View style={styles.chipWrap}>
-                <Button
-                  title="All"
-                  size="sm"
-                  variant={categoryFilter === "ALL" ? "primary" : "outline"}
-                  onPress={() => setCategoryFilter("ALL")}
-                  style={styles.filterChip}
-                />
-                {categories.map((category) => (
-                  <Button
-                    key={category.value}
-                    title={`${category.label} (${category.count})`}
-                    size="sm"
-                    variant={categoryFilter === category.value ? "primary" : "outline"}
-                    onPress={() => setCategoryFilter(category.value)}
-                    style={styles.filterChip}
-                  />
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Status</Text>
-              <View style={styles.chipWrap}>
-                <Button
-                  title="All"
-                  size="sm"
-                  variant={statusFilter === "ALL" ? "primary" : "outline"}
-                  onPress={() => setStatusFilter("ALL")}
-                  style={styles.filterChip}
-                />
-                {statuses.map((status) => (
-                  <Button
-                    key={status.value}
-                    title={`${formatTaskStatusLabel(status.value)} (${status.count})`}
-                    size="sm"
-                    variant={statusFilter === status.value ? "primary" : "outline"}
-                    onPress={() => setStatusFilter(status.value)}
-                    style={styles.filterChip}
-                  />
-                ))}
-              </View>
-            </View>
-
-            <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Budget Range (VND)</Text>
-              <View style={styles.priceRow}>
-                <Input
-                  placeholder="Min"
-                  keyboardType="numeric"
-                  value={minBudget}
-                  onChangeText={setMinBudget}
-                  style={styles.priceInput}
-                />
-                <Input
-                  placeholder="Max"
-                  keyboardType="numeric"
-                  value={maxBudget}
-                  onChangeText={setMaxBudget}
-                  style={styles.priceInput}
-                />
-              </View>
-            </View>
-          </View>
-        </Card>
-
-        <Card title="Results" actions={<Badge label={`${filteredTasks.length} tasks`} variant="neutral" />}>
-          {isLoading && tasks.length === 0 ? (
-            <View style={styles.centerState}>
-              <ActivityIndicator color={colors.primary[600]} />
-              <Text style={styles.loadingText}>Loading tasks...</Text>
-            </View>
-          ) : null}
-
-          {!isLoading && error ? (
-            <View style={styles.centerState}>
-              <Text style={styles.errorText}>{error}</Text>
-              <Button title="Retry" onPress={() => void fetchTasks()} />
-            </View>
-          ) : null}
-
-          {!isLoading && !error && filteredTasks.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No tasks match your filters</Text>
-              <Text style={styles.emptySubtitle}>Try another location or clear filters to view more jobs.</Text>
-            </View>
-          ) : null}
-
-          {!error &&
-            filteredTasks.map((task: Task) => (
-              <TaskCard
+        <View style={styles.grid}>
+          {paginatedTasks.map((task) => {
+            const isSaved = savedTaskIds.some((id) => String(id) === String(task.id));
+            return (
+              <View
                 key={String(task.id)}
-                task={task}
-                onView={() => {
-                  Alert.alert("Task Details", `${task.title}\n${task.location}`);
-                }}
-                onBid={() => {
-                  Alert.alert("Bid Task", `Start bidding on: ${task.title}`);
-                }}
-              />
-            ))}
-        </Card>
-      </ScrollView>
-    </SafeAreaView>
+                style={[styles.gridItem, columns === 1 ? styles.gridItemSingle : styles.gridItemDouble]}
+              >
+                <TaskCard
+                  task={task}
+                  isSaved={isSaved}
+                  onToggleSave={() => {
+                    if (!isAuthenticated) {
+                      Alert.alert("Sign in required", "Sign in to save tasks across web and mobile.");
+                      return;
+                    }
+                    if (isSaved) {
+                      void unsaveTask(task.id);
+                    } else {
+                      void saveTask(task.id);
+                    }
+                  }}
+                  onView={() =>
+                    router.push({ pathname: "/task-detail", params: { taskId: String(task.id) } })
+                  }
+                  onBid={
+                    user && String(user.role).toUpperCase() === "PROVIDER"
+                      ? () => router.push({ pathname: "/task-detail", params: { taskId: String(task.id) } })
+                      : undefined
+                  }
+                />
+              </View>
+            );
+          })}
+        </View>
+
+        {paginatedTasks.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No tasks match your current filters.</Text>
+            <Text style={styles.emptySubtitle}>Try another search, status, or budget value.</Text>
+          </View>
+        ) : null}
+
+        <View style={styles.paginationRow}>
+          <Button
+            title="Previous"
+            size="sm"
+            variant="outline"
+            disabled={safePage <= 1}
+            onPress={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          />
+          <View style={styles.pageList}>
+            {visiblePages.map((page, index) =>
+              page === "..." ? (
+                <Text key={`ellipsis-${index}`} style={styles.pageEllipsis}>
+                  ...
+                </Text>
+              ) : (
+                <Pressable
+                  key={page}
+                  onPress={() => setCurrentPage(page)}
+                  style={[styles.pageChip, page === safePage ? styles.pageChipActive : null]}
+                >
+                  <Text style={[styles.pageChipText, page === safePage ? styles.pageChipTextActive : null]}>
+                    {page}
+                  </Text>
+                </Pressable>
+              )
+            )}
+          </View>
+          <Button
+            title="Next"
+            size="sm"
+            variant="outline"
+            disabled={safePage >= pageCount}
+            onPress={() => setCurrentPage((page) => Math.min(pageCount, page + 1))}
+          />
+        </View>
+      </Card>
+    </MarketplaceShell>
+  );
+}
+
+function HeroStat({
+  value,
+  label,
+  subLabel,
+}: {
+  value: string;
+  label: string;
+  subLabel?: string;
+}): React.ReactElement {
+  return (
+    <View style={styles.heroStatCard}>
+      <Text style={styles.heroStatValue}>{value}</Text>
+      <Text style={styles.heroStatLabel}>{label}</Text>
+      {subLabel ? <Text style={styles.heroStatSubLabel}>{subLabel}</Text> : null}
+    </View>
+  );
+}
+
+function CategoryChip({
+  label,
+  count,
+  active,
+  onPress,
+}: {
+  label: string;
+  count: number;
+  active: boolean;
+  onPress: () => void;
+}): React.ReactElement {
+  return (
+    <Pressable onPress={onPress} style={[styles.categoryChip, active ? styles.categoryChipActive : null]}>
+      <Text style={[styles.categoryChipTitle, active ? styles.categoryChipTitleActive : null]}>{label}</Text>
+      <Text style={[styles.categoryChipCount, active ? styles.categoryChipCountActive : null]}>{count} tasks</Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#eef2ff",
-  },
-  scroll: {
-    flex: 1,
-  },
-  contentContainer: {
-    padding: 16,
-    paddingBottom: 28,
-    gap: 14,
-  },
-  hero: {
+  heroCard: {
     borderRadius: radius.xl,
+    backgroundColor: "#123b88",
     padding: 18,
     gap: 10,
-    backgroundColor: "#2b49d9",
-    overflow: "visible",
   },
-  heroGlowOne: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 999,
-    backgroundColor: "rgba(168,85,247,0.35)",
-    top: -100,
-    right: -70,
-  },
-  heroGlowTwo: {
-    position: "absolute",
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: "rgba(99,102,241,0.35)",
-    bottom: -90,
-    left: -60,
-  },
-  heroTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  heroEyebrow: {
+    color: "#bfdbfe",
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700",
   },
   heroTitle: {
-    fontSize: 42,
-    lineHeight: 46,
     color: colors.white,
-    fontWeight: "900",
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: "800",
   },
-  heroSubtitle: {
-    fontSize: 18,
-    lineHeight: 24,
+  heroBody: {
     color: "#dbeafe",
+    fontSize: 14,
+    lineHeight: 20,
   },
-  searchStack: {
+  heroStatsRow: {
     gap: 10,
     marginTop: 4,
   },
-  heroInputWrap: {
-    backgroundColor: "rgba(255,255,255,0.98)",
+  heroStatCard: {
     borderRadius: radius.lg,
-  },
-  locationWrap: {
-    position: "relative",
-    zIndex: 100,
-  },
-  locationButton: {
-    minHeight: 46,
+    backgroundColor: "rgba(255,255,255,0.12)",
     borderWidth: 1,
-    borderColor: colors.primary[200],
-    borderRadius: radius.lg,
-    backgroundColor: "rgba(255,255,255,0.98)",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    borderColor: "rgba(255,255,255,0.14)",
+    padding: 12,
+    gap: 2,
   },
-  locationText: {
-    color: colors.dark[800],
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: "600",
-  },
-  locationTextPlaceholder: {
-    color: colors.dark[500],
-    fontWeight: "500",
-  },
-  locationArrow: {
-    color: colors.dark[500],
-    fontSize: 12,
-    lineHeight: 12,
-  },
-  locationMenu: {
-    position: "absolute",
-    top: 50,
-    left: 0,
-    right: 0,
-    maxHeight: 220,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.primary[200],
-    backgroundColor: colors.white,
-    zIndex: 200,
-  },
-  locationMenuScroll: {
-    maxHeight: 220,
-  },
-  locationOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  locationOptionSelected: {
-    backgroundColor: colors.primary[50],
-  },
-  locationOptionText: {
-    color: colors.dark[700],
+  heroStatValue: {
+    color: colors.white,
     fontSize: 14,
     lineHeight: 19,
-    fontWeight: "500",
-  },
-  locationOptionTextSelected: {
-    color: colors.primary[700],
-    fontWeight: "700",
-  },
-  heroStats: {
-    flexDirection: "row",
-    gap: 14,
-    marginTop: 2,
-  },
-  heroStatText: {
-    color: "#dbeafe",
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "700",
-  },
-  topCard: {
-    borderColor: "#dbe2f2",
-  },
-  topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 10,
-  },
-  resultTitle: {
-    color: colors.dark[900],
-    fontSize: 30,
-    lineHeight: 34,
     fontWeight: "800",
   },
-  resultSubTitle: {
-    color: colors.dark[500],
+  heroStatLabel: {
+    color: "#dbeafe",
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  heroStatSubLabel: {
+    color: "#bfdbfe",
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  filterCard: {
+    borderColor: "#dce7f7",
+  },
+  filterUpperRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  filterBlockWide: {
+    width: "100%",
+    gap: 6,
+  },
+  filterBlock: {
+    width: "100%",
+    gap: 6,
+  },
+  filterLabel: {
+    color: colors.dark[700],
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  input: {
+    minHeight: 44,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    backgroundColor: colors.white,
+    paddingHorizontal: 14,
+    color: colors.dark[900],
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  dropdownButton: {
+    minHeight: 44,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    backgroundColor: colors.white,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dropdownButtonText: {
+    color: colors.dark[900],
     fontSize: 14,
     lineHeight: 18,
     fontWeight: "600",
   },
-  filters: {
-    gap: 14,
+  dropdownChevron: {
+    color: colors.dark[500],
+    fontSize: 14,
+    lineHeight: 18,
   },
-  filterGroup: {
-    gap: 8,
+  dropdownMenu: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    backgroundColor: colors.white,
+    overflow: "hidden",
   },
-  filterLabel: {
+  dropdownScroll: {
+    maxHeight: 220,
+  },
+  dropdownItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  dropdownItemActive: {
+    backgroundColor: colors.primary[50],
+  },
+  dropdownItemText: {
+    color: colors.dark[700],
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: "700",
-    color: colors.dark[700],
+    fontWeight: "600",
   },
-  chipWrap: {
+  dropdownItemTextActive: {
+    color: colors.primary[700],
+  },
+  moneyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  moneyButton: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.lg,
+    backgroundColor: colors.dark[50],
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moneyButtonText: {
+    color: colors.dark[800],
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: "800",
+  },
+  moneyInput: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    backgroundColor: colors.white,
+    paddingHorizontal: 14,
+    color: colors.dark[900],
+    fontSize: 14,
+    lineHeight: 18,
+  },
+  ctaButton: {
+    minWidth: 92,
+  },
+  categoryHeader: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  categoryTitle: {
+    color: colors.dark[900],
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: "800",
+  },
+  categoryTip: {
+    color: colors.dark[500],
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  categoryRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
   },
-  filterChip: {
-    marginBottom: 2,
+  categoryChip: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
+    backgroundColor: colors.white,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 2,
   },
-  smallChip: {
-    marginBottom: 2,
+  categoryChipActive: {
+    borderColor: colors.primary[500],
+    backgroundColor: colors.primary[50],
   },
-  priceRow: {
+  categoryChipTitle: {
+    color: colors.dark[800],
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700",
+  },
+  categoryChipTitleActive: {
+    color: colors.primary[700],
+  },
+  categoryChipCount: {
+    color: colors.dark[500],
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  categoryChipCountActive: {
+    color: colors.primary[700],
+  },
+  resultsCard: {
+    borderColor: "#dce7f7",
+  },
+  resultsHeader: {
+    marginBottom: 10,
+  },
+  resultsTitle: {
+    color: colors.dark[900],
+    fontSize: 19,
+    lineHeight: 24,
+    fontWeight: "800",
+  },
+  resultsSubtitle: {
+    color: colors.dark[500],
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  grid: {
     flexDirection: "row",
-    gap: 10,
+    flexWrap: "wrap",
+    gap: 12,
   },
-  priceInput: {
-    flex: 1,
+  gridItem: {
+    width: "100%",
+  },
+  gridItemSingle: {
+    width: "100%",
+  },
+  gridItemDouble: {
+    width: "48.5%",
   },
   emptyState: {
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.dark[200],
     borderStyle: "dashed",
-    borderRadius: radius.lg,
     padding: 16,
-    gap: 4,
     alignItems: "center",
+    gap: 4,
   },
   emptyTitle: {
     color: colors.dark[800],
     fontSize: 15,
     lineHeight: 20,
     fontWeight: "700",
+    textAlign: "center",
   },
   emptySubtitle: {
     color: colors.dark[500],
@@ -569,23 +687,47 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: "center",
   },
-  centerState: {
+  paginationRow: {
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  pageList: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    flex: 1,
+  },
+  pageChip: {
+    minWidth: 34,
+    height: 34,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.dark[200],
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
   },
-  loadingText: {
-    color: colors.dark[600],
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "600",
+  pageChipActive: {
+    borderColor: colors.primary[600],
+    backgroundColor: colors.primary[600],
   },
-  errorText: {
-    color: colors.danger[600],
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "600",
-    textAlign: "center",
+  pageChipText: {
+    color: colors.dark[700],
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
+  pageChipTextActive: {
+    color: colors.white,
+  },
+  pageEllipsis: {
+    color: colors.dark[500],
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
 import { useTaskStore } from '../stores/task.store';
-import { TaskCard } from '../components/task/TaskCard';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { formatVnd } from '../utils';
+import { api } from '../services/api';
 
 export const MyTasksPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export const MyTasksPage: React.FC = () => {
       try {
         await deleteTask(taskId);
         toast.success('Task deleted successfully');
-      } catch (error) {
+      } catch {
         toast.error('Failed to delete task');
       }
     }
@@ -37,17 +38,47 @@ export const MyTasksPage: React.FC = () => {
     navigate(`/post-task?id=${taskId}`);
   };
 
-  const myTasks = tasks.filter(task => task.client?.id === user?.id);
+  const handleRateProvider = async (taskId: string | number) => {
+    const starsRaw = window.prompt('Rate provider from 1 to 5 stars');
+    if (!starsRaw) return;
+    const rating = Number(starsRaw);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      toast.error('Please enter a valid star rating from 1 to 5');
+      return;
+    }
+    const comment = window.prompt('Optional feedback comment') || undefined;
+    try {
+      await api.ratings.create({
+        taskId: Number(taskId),
+        rating,
+        comment,
+      });
+      toast.success('Provider rated successfully');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Could not submit provider rating');
+    }
+  };
+
+  const myTasks = tasks.filter(
+    (task) =>
+      String(task.createdById || task.client?.id || task.clientId || '') ===
+      String(user?.id || '')
+  );
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { bg: string; text: string; border: string }> = {
+      OPEN: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       POSTED: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
       BIDDING: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
       ASSIGNED: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
       IN_PROGRESS: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+      PENDING_CONFIRMATION: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
       COMPLETED: { bg: 'bg-dark-50', text: 'text-dark-700', border: 'border-dark-200' },
+      AWAITING_PAYMENT: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+      DISPUTED: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+      PAID: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
     };
-    return styles[status] || styles.POSTED;
+    return styles[status] || styles.OPEN;
   };
 
   return (
@@ -114,14 +145,18 @@ export const MyTasksPage: React.FC = () => {
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-lg font-semibold text-dark-900 truncate">{task.title}</h3>
                         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}>
-                          {task.status.replace('_', ' ')}
+                          {(task.status === 'OPEN' || task.status === 'POSTED')
+                            ? 'OPEN'
+                            : task.status.replace('_', ' ')}
                         </span>
                       </div>
                       <p className="text-dark-600 mt-1 line-clamp-2">{task.description}</p>
                       <div className="flex gap-6 mt-4 text-sm flex-wrap">
                         <span className="flex items-center gap-2 text-dark-600">
                           <span className="text-lg">💰</span>
-                          <span className="font-semibold text-dark-900">${task.budget || 'Flexible'}</span>
+                          <span className="font-semibold text-dark-900">
+                            {task.budget ? formatVnd(task.budget) : 'Flexible'}
+                          </span>
                         </span>
                         <span className="flex items-center gap-2 text-dark-600">
                           <span className="text-lg">📅</span>
@@ -141,19 +176,29 @@ export const MyTasksPage: React.FC = () => {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleEdit(task.id)}
+                        onClick={() => handleEdit(String(task.id))}
                         className="p-3 text-primary-500 hover:bg-primary-50 rounded-xl transition-all"
                         title="Edit task"
                       >
                         <PencilIcon className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(task.id)}
+                        onClick={() => handleDelete(String(task.id))}
                         className="p-3 text-danger-500 hover:bg-danger-50 rounded-xl transition-all"
                         title="Delete task"
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
+                      {['COMPLETED'].includes(String(task.status || '').toUpperCase())
+                        && task.assignedProviderId && (
+                          <Button
+                            variant="outline"
+                            className="ml-2"
+                            onClick={() => handleRateProvider(task.id)}
+                          >
+                            Rate Provider
+                          </Button>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -165,4 +210,3 @@ export const MyTasksPage: React.FC = () => {
     </div>
   );
 };
-

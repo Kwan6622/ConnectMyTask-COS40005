@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Redirect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AIAssistantButton } from "@/components/AIAssistantButton";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { useAuthStore } from "@/store/authStore";
+import { useResponsiveLayout } from "@/theme/responsive";
 import { colors, radius } from "@/theme/tokens";
 
 export default function SignInScreen(): React.ReactElement {
   const router = useRouter();
+  const { isCompact, contentMaxWidth } = useResponsiveLayout();
   const login = useAuthStore((state) => state.login);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
@@ -31,7 +34,7 @@ export default function SignInScreen(): React.ReactElement {
     setFormError("");
     try {
       await login(normalizedEmail, password);
-      router.replace("/");
+      router.replace("/browse-tasks");
     } catch (error) {
       console.error("Sign in failed", error);
       setFormError("Sign in failed. Please try again.");
@@ -41,18 +44,19 @@ export default function SignInScreen(): React.ReactElement {
   };
 
   if (isAuthenticated) {
-    return <Redirect href="/" />;
+    return <Redirect href="/browse-tasks" />;
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.safeArea}>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+          <View style={[styles.contentWrap, { maxWidth: contentMaxWidth }]}>
           <View style={styles.header}>
             <View style={styles.heroGlowOne} />
             <View style={styles.heroGlowTwo} />
             <Badge label="Welcome back" variant="primary" />
-            <Text style={styles.title}>Sign In</Text>
+            <Text style={[styles.title, isCompact ? styles.titleCompact : null]}>Sign In</Text>
             <Text style={styles.subtitle}>Access your task dashboard with the same web data.</Text>
           </View>
 
@@ -90,7 +94,9 @@ export default function SignInScreen(): React.ReactElement {
               </View>
             </View>
           </Card>
+          </View>
         </ScrollView>
+        <AIAssistantButton />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -107,6 +113,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     paddingBottom: 28,
+    gap: 14,
+  },
+  contentWrap: {
+    width: "100%",
+    alignSelf: "center",
     gap: 14,
   },
   header: {
@@ -139,6 +150,10 @@ const styles = StyleSheet.create({
     lineHeight: 36,
     color: colors.white,
     fontWeight: "800",
+  },
+  titleCompact: {
+    fontSize: 26,
+    lineHeight: 32,
   },
   subtitle: {
     fontSize: 14,

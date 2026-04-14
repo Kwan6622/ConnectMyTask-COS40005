@@ -10,7 +10,17 @@ async function recommendForTask(req, res, next) {
   }
 }
 
+async function predictPrice(req, res, next) {
+  try {
+    const result = await aiService.predictPriceFromPayload(req.body || {});
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   recommendForTask,
+  predictPrice,
 };
 

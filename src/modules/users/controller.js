@@ -33,9 +33,51 @@ async function updateProfilePhoto(req, res, next) {
   }
 }
 
+async function updateProviderProfile(req, res, next) {
+  try {
+    const profile = await userService.updateProviderProfile(req.user, req.body);
+    res.json(profile);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function addProviderCertificate(req, res, next) {
+  try {
+    const certificate = await userService.addProviderCertificate(req.user, req.body);
+    res.status(201).json(certificate);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function verifyProviderCertificate(req, res, next) {
+  try {
+    const certificateId = parseInt(req.params.id, 10);
+    const certificate = await userService.verifyProviderCertificate(certificateId, req.body, req.user);
+    res.json(certificate);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getProviderRatingSummary(req, res, next) {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    const summary = await userService.getProviderRatingSummary(userId);
+    res.json(summary);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createUser,
   getUserById,
   updateProfilePhoto,
+  updateProviderProfile,
+  addProviderCertificate,
+  verifyProviderCertificate,
+  getProviderRatingSummary,
 };
 

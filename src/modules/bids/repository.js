@@ -1,64 +1,105 @@
 const { prisma } = require('../../database/prisma');
 
 async function createBid(data) {
-  return prisma.bid.create({ data });
+  return prisma.bid.create({
+    data,
+    include: {
+      provider: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          profilePhotoUrl: true,
+          skills: true,
+        },
+      },
+    },
+  });
 }
 
-async function getBidById(id) {
-  return prisma.bid.findUnique({
+async function getTaskById(id) {
+  return prisma.task.findUnique({
     where: { id },
-    include: { task: true, provider: true },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          profilePhotoUrl: true,
+        },
+      },
+      _count: {
+        select: { bids: true },
+      },
+    },
   });
 }
 
 async function listBidsForTask(taskId) {
   return prisma.bid.findMany({
     where: { taskId },
+    include: {
+      provider: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          profilePhotoUrl: true,
+          skills: true,
+        },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   });
 }
 
-async function acceptBid(id) {
-  return prisma.$transaction(async (tx) => {
-    const bid = await tx.bid.findUnique({ where: { id } });
-    if (!bid) {
-      const err = new Error('Bid not found');
-      err.statusCode = 404;
-      throw err;
-    }
-
-    // Mark selected bid as ACCEPTED
-    const acceptedBid = await tx.bid.update({
-      where: { id },
-      data: { status: 'ACCEPTED' },
-    });
-
-    // Reject all other bids on the same task
-    await tx.bid.updateMany({
-      where: {
-        taskId: bid.taskId,
-        id: { not: id },
+async function listBidsForProvider(providerId) {
+  return prisma.bid.findMany({
+    where: { providerId },
+    include: {
+      task: {
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+        },
       },
-      data: { status: 'REJECTED' },
-    });
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
 
-    // Assign provider to the task
-    await tx.task.update({
-      where: { id: bid.taskId },
-      data: {
-        assignedProviderId: bid.providerId,
-        status: 'ASSIGNED',
-      },
-    });
+async function updateTaskStatus(taskId, status) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: { status },
+  });
+}
 
-    return acceptedBid;
+async function markTaskAsBidding(taskId, biddingStartedAt, biddingEndsAt) {
+  return prisma.task.update({
+    where: { id: taskId },
+    data: {
+      status: 'BIDDING',
+      biddingStartedAt,
+      biddingEndsAt,
+    },
   });
 }
 
 module.exports = {
   createBid,
-  getBidById,
+  getTaskById,
   listBidsForTask,
-  acceptBid,
+  listBidsForProvider,
+  updateTaskStatus,
+  markTaskAsBidding,
 };
-

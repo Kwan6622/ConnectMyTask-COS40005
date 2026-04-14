@@ -2,6 +2,197 @@
 
 Node.js / Express backend for the **ConnectMyTask** capstone project. This service provides task management, bidding, reviews, AI-assisted recommendations, and IoT-style GPS tracking with real-time updates via Socket.io.
 
+## Run Full Project (Backend + Web + Optional Mobile)
+
+### Quick Run Commands (Windows/macOS/Linux)
+
+Use 2 terminals.
+
+Terminal 1 (root): backend + Prisma
+
+```bash
+cd <project-root>
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
+
+Terminal 2 (`frontend-web`): web
+
+```bash
+cd <project-root>/frontend-web
+npm install
+npm run dev
+```
+
+URLs:
+
+- Backend: `http://localhost:4000`
+- Web: `http://localhost:5173`
+
+Required env files:
+
+- Root `.env`: `DATABASE_URL=...`, `PORT=4000`, `JWT_SECRET=...`
+- `frontend-web/.env`: `VITE_API_URL=http://localhost:4000/api`, `VITE_WS_URL=ws://localhost:4000`
+
+### Prerequisites
+
+- Node.js `>=18`
+- npm `>=9`
+- A valid Postgres database URL (local Postgres or Neon)
+
+### 1) Backend setup (root folder)
+
+From project root:
+
+```bash
+npm install
+```
+
+Create `.env` from `.env.example`:
+
+- macOS/Linux:
+```bash
+cp .env.example .env
+```
+- Windows PowerShell:
+```powershell
+Copy-Item .env.example .env
+```
+- Windows CMD:
+```bat
+copy .env.example .env
+```
+
+Update `.env`:
+
+- `DATABASE_URL` (your Neon/local Postgres URL)
+- `PORT=4000`
+- `JWT_SECRET` (any secure random string)
+
+Then prepare Prisma:
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+Run backend:
+
+```bash
+npm run dev
+```
+
+Backend should run at `http://localhost:4000`.
+
+### 2) Web setup (`frontend-web`)
+
+Open a second terminal:
+
+```bash
+cd frontend-web
+npm install
+```
+
+Create/update `frontend-web/.env`:
+
+```env
+VITE_API_URL=http://localhost:4000/api
+VITE_WS_URL=ws://localhost:4000
+```
+
+Run web:
+
+```bash
+npm run dev
+```
+
+Web should run at `http://localhost:5173`.
+
+### NPM steps required before running web
+
+From project root (backend + Prisma):
+
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+```
+
+Then from web folder:
+
+```bash
+cd frontend-web
+npm install
+npm run dev
+```
+
+If you skip root install/Prisma steps, login/tasks/payment APIs can fail even when web UI opens.
+
+### Stripe sandbox test cards (Payment)
+
+Use these in Stripe Checkout test mode:
+
+- Success: `4242 4242 4242 4242`
+- Requires 3DS authentication: `4000 0025 0000 3155`
+- Declined (insufficient funds): `4000 0000 0000 9995`
+
+### 3) Optional mobile setup (`frontend-mobile`)
+
+Note: iOS Simulator requires a MacBook/macOS with Xcode installed.
+If you are on Windows/Linux, use Android emulator or iPad/iPhone real device via Expo Go.
+
+Open a third terminal:
+
+```bash
+cd frontend-mobile
+npm install
+```
+
+Create/update `frontend-mobile/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:4000/api
+```
+
+Run mobile:
+
+```bash
+# Android emulator (Windows/macOS/Linux)
+npm run android
+
+# Real iPad/iPhone via Expo Go tunnel (Windows/macOS/Linux)
+npm run ipad
+
+# iOS simulator (macOS only)
+npm run ios
+```
+
+From project root, you can also use:
+
+```bash
+npm run mobile:android
+npm run mobile:ipad
+npm run mobile:ios
+```
+
+### 4) Quick smoke test
+
+1. Open web at `http://localhost:5173`.
+2. Register a new account.
+3. Login with that account.
+4. Browse tasks and create a task.
+5. Confirm new task appears in browse list.
+
+If register/login fails on another machine, 90% of cases are:
+
+- Wrong `DATABASE_URL` in root `.env`
+- Forgot `npx prisma generate`
+- Forgot `npx prisma db push`
+- Web `.env` still points to wrong API port
+- Backend is not running on `4000`
+
 ### Tech Stack
 
 - **Runtime**: Node.js (CommonJS)

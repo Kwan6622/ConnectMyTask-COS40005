@@ -1,6 +1,6 @@
 const express = require('express');
 const { createValidationMiddleware } = require('../../shared/validation/validateRequest');
-const { aiRecommendParamsSchema } = require('./validation');
+const { aiRecommendParamsSchema, aiPredictPriceBodySchema } = require('./validation');
 const aiController = require('./controller');
 
 const router = express.Router();
@@ -10,6 +10,13 @@ router.post(
   '/recommend/:taskId',
   createValidationMiddleware({ params: aiRecommendParamsSchema }),
   aiController.recommendForTask
+);
+
+// POST /ai/predict-price
+router.post(
+  '/predict-price',
+  createValidationMiddleware({ body: aiPredictPriceBodySchema }),
+  aiController.predictPrice
 );
 
 module.exports = router;

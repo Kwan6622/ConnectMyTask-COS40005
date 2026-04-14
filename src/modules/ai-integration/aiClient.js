@@ -16,7 +16,21 @@ async function requestRecommendation(taskPayload) {
   }
 }
 
+async function requestFraudDetection(fraudPayload) {
+  const url = `${env.AI_SERVICE_URL.replace(/\/$/, '')}/detect-fraud`;
+
+  try {
+    const response = await axios.post(url, fraudPayload, {
+      timeout: 3000,
+    });
+    return response.data;
+  } catch (err) {
+    return null; // Fallback to safe
+  }
+}
+
 module.exports = {
   requestRecommendation,
+  requestFraudDetection,
 };
 

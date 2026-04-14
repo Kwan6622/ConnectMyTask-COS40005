@@ -12,11 +12,13 @@ export const TASK_CATEGORIES: Array<{ value: TaskCategory; label: string; icon: 
 ];
 
 export const TASK_STATUSES: Array<{ value: TaskStatus; label: string; icon: string; color: string }> = [
-  { value: 'POSTED', label: 'Posted', icon: '📝', color: 'blue' },
+  { value: 'OPEN', label: 'Open', icon: '📝', color: 'blue' },
   { value: 'BIDDING', label: 'Bidding', icon: '🏷️', color: 'yellow' },
   { value: 'ASSIGNED', label: 'Assigned', icon: '✅', color: 'green' },
   { value: 'IN_PROGRESS', label: 'In Progress', icon: '⚙️', color: 'purple' },
+  { value: 'PENDING_CONFIRMATION', label: 'Pending Confirmation', icon: '⏳', color: 'amber' },
   { value: 'COMPLETED', label: 'Completed', icon: '🎉', color: 'gray' },
+  { value: 'DISPUTED', label: 'Disputed', icon: '⚠️', color: 'red' },
 ];
 
 export const TASK_CATEGORY_DESCRIPTIONS: Record<TaskCategory, string> = {

@@ -1,0 +1,28 @@
+-- Add max bid limit per task (hard-capped in service layer to 100).
+ALTER TABLE "TASKS"
+ADD COLUMN "maxBids" INTEGER NOT NULL DEFAULT 30;
+
+ALTER TABLE "TASKS"
+ADD CONSTRAINT "TASKS_maxBids_check" CHECK ("maxBids" >= 1 AND "maxBids" <= 100);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'SubtaskStatus') THEN
+    CREATE TYPE "SubtaskStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'DONE');
+  END IF;
+END
+$$;
+
+CREATE TABLE "TASK_SUBTASKS" (
+  "id" SERIAL NOT NULL,
+  "title" TEXT NOT NULL,
+  "status" "SubtaskStatus" NOT NULL DEFAULT 'PENDING',
+  "order" INTEGER NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "taskId" INTEGER NOT NULL,
+  CONSTRAINT "TASK_SUBTASKS_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "TASK_SUBTASKS_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "TASKS"("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+CREATE INDEX "TASK_SUBTASKS_taskId_order_idx" ON "TASK_SUBTASKS"("taskId", "order");

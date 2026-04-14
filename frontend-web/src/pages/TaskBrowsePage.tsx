@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../stores/task.store';
+import { useAuthStore } from '../stores/auth.store';
 import { TaskCard } from '../components/task/TaskCard';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -16,13 +17,53 @@ import {
   StarIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import { api } from '../services/api';
+
+function getVisiblePages(currentPage: number, totalPages: number): Array<number | '...'> {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, '...', totalPages];
+  }
+
+  if (currentPage >= totalPages - 2) {
+    return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  }
+
+  return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+}
+
+function taskPriorityScore(task: { status: string; isOverdue?: boolean }): number {
+  if (task.isOverdue) return 6.5;
+  const rank: Record<string, number> = {
+    OPEN: 1,
+    BIDDING: 2,
+    ASSIGNED: 3,
+    IN_PROGRESS: 4,
+    PENDING_CONFIRMATION: 5,
+    DISPUTED: 6,
+    COMPLETED: 7,
+    AWAITING_PAYMENT: 8,
+    PAID: 9,
+    CANCELLED: 10,
+  };
+  return rank[String(task.status || '').toUpperCase()] ?? 50;
+}
 
 export const TaskBrowsePage: React.FC = () => {
+  const ITEMS_PER_PAGE = 4;
   const navigate = useNavigate();
   const { tasks, filters, isLoading, fetchTasks, setFilters, clearFilters } = useTaskStore();
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [locationQuery, setLocationQuery] = useState('');
-  const [sortBy, setSortBy] = useState('recent');
+  const [isSearchDraftDirty, setIsSearchDraftDirty] = useState(false);
+  const [sortBy, setSortBy] = useState('opportunity');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [browseMode, setBrowseMode] = useState<'all' | 'suggested'>('all');
+  const [suggestedTasks, setSuggestedTasks] = useState<any[]>([]);
   const locationOptions = [
     '',
     'District 1',
@@ -47,24 +88,59 @@ export const TaskBrowsePage: React.FC = () => {
 
   useEffect(() => {
     fetchTasks();
-  }, [filters]);
+  }, []);
+
+  useEffect(() => {
+    if (browseMode !== 'suggested') return;
+    if (String(user?.role || '').toUpperCase() !== 'PROVIDER') return;
+    api.tasks
+      .getSuggestedMe()
+      .then((response) => {
+        setSuggestedTasks(Array.isArray(response.data) ? response.data : []);
+      })
+      .catch(() => {
+        setSuggestedTasks([]);
+      });
+  }, [browseMode, user?.id, user?.role]);
+
+  const sourceTasks = browseMode === 'suggested' ? suggestedTasks : tasks;
+  const browseVisibleTasks = useMemo(
+    () =>
+      sourceTasks.filter((task) => {
+        const status = String(task.status || '').toUpperCase();
+        const isAssigned = status === TaskStatus.ASSIGNED;
+        const isOverdueUnassigned = Boolean(task.isOverdue) && !task.assignedProviderId;
+        return !isAssigned && !isOverdueUnassigned;
+      }),
+    [sourceTasks]
+  );
+
+  const effectiveSearch = isSearchDraftDirty ? searchQuery : (filters.search || '');
+  const effectiveLocation = isSearchDraftDirty ? locationQuery : (filters.location || '');
+
+  const applyFilterUpdate = (nextFilters: Partial<typeof filters>) => {
+    setCurrentPage(1);
+    setFilters(nextFilters);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setCurrentPage(1);
     setFilters({
-      search: searchQuery,
-      location: locationQuery,
+      search: effectiveSearch,
+      location: effectiveLocation,
     });
+    setIsSearchDraftDirty(false);
   };
 
   const handleCategoryClick = (categoryValue: TaskCategory) => {
-    setFilters({
+    applyFilterUpdate({
       category: filters.category === categoryValue ? undefined : categoryValue,
     });
   };
 
   const handleStatusClick = (statusValue: TaskStatus) => {
-    setFilters({
+    applyFilterUpdate({
       status: filters.status === statusValue ? undefined : statusValue,
     });
   };
@@ -72,6 +148,8 @@ export const TaskBrowsePage: React.FC = () => {
   const handleReset = () => {
     setSearchQuery('');
     setLocationQuery('');
+    setIsSearchDraftDirty(false);
+    setCurrentPage(1);
     clearFilters();
   };
 
@@ -86,25 +164,27 @@ export const TaskBrowsePage: React.FC = () => {
     { value: TaskCategory.OTHER, label: 'Other', icon: '⭐', count: 0 },
   ].map((category) => ({
     ...category,
-    count: tasks.filter((task) => task.category === category.value).length,
+    count: browseVisibleTasks.filter((task) => task.category === category.value).length,
   }));
 
   const statuses: Array<{ value: TaskStatus; label: string; color: string }> = [
-    { value: TaskStatus.POSTED, label: 'Posted', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { value: TaskStatus.OPEN, label: 'Open', color: 'bg-blue-100 text-blue-700 border-blue-200' },
     { value: TaskStatus.BIDDING, label: 'Bidding', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
     { value: TaskStatus.ASSIGNED, label: 'Assigned', color: 'bg-green-100 text-green-700 border-green-200' },
     { value: TaskStatus.IN_PROGRESS, label: 'In Progress', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { value: TaskStatus.PENDING_CONFIRMATION, label: 'Pending Confirmation', color: 'bg-amber-100 text-amber-700 border-amber-200' },
     { value: TaskStatus.COMPLETED, label: 'Completed', color: 'bg-dark-100 text-dark-700 border-dark-200' },
+    { value: TaskStatus.AWAITING_PAYMENT, label: 'Awaiting Payment', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    { value: TaskStatus.PAID, label: 'Paid', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    { value: TaskStatus.DISPUTED, label: 'Disputed', color: 'bg-red-100 text-red-700 border-red-200' },
   ];
 
-  const filteredTasks = tasks.filter((task) => {
+  const filteredTasks = useMemo(() => browseVisibleTasks.filter((task) => {
     if (filters.category && task.category !== filters.category) {
       return false;
     }
 
-    if (filters.status && task.status !== filters.status) {
-      return false;
-    }
+    if (filters.status && task.status !== filters.status) return false;
 
     if (
       filters.search &&
@@ -136,10 +216,29 @@ export const TaskBrowsePage: React.FC = () => {
     const budgetB = b.budget ?? b.aiSuggestedPrice ?? 0;
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
-    const deadlineA = new Date(a.deadline || 0).getTime();
-    const deadlineB = new Date(b.deadline || 0).getTime();
+    const deadlineA = new Date(a.dueDate || a.deadline || 0).getTime();
+    const deadlineB = new Date(b.dueDate || b.deadline || 0).getTime();
 
     switch (sortBy) {
+      case 'opportunity': {
+        const priorityDiff = taskPriorityScore(a) - taskPriorityScore(b);
+        if (priorityDiff !== 0) return priorityDiff;
+
+        const statusA = String(a.status || '').toUpperCase();
+        const statusB = String(b.status || '').toUpperCase();
+        const isOpportunityA = statusA === TaskStatus.OPEN || statusA === TaskStatus.BIDDING;
+        const isOpportunityB = statusB === TaskStatus.OPEN || statusB === TaskStatus.BIDDING;
+
+        if (isOpportunityA && isOpportunityB) {
+          const safeDeadlineA = Number.isNaN(deadlineA) || deadlineA <= 0 ? Number.MAX_SAFE_INTEGER : deadlineA;
+          const safeDeadlineB = Number.isNaN(deadlineB) || deadlineB <= 0 ? Number.MAX_SAFE_INTEGER : deadlineB;
+          if (safeDeadlineA !== safeDeadlineB) {
+            return safeDeadlineA - safeDeadlineB;
+          }
+        }
+
+        return dateB - dateA;
+      }
       case 'priceLow':
         return budgetA - budgetB;
       case 'priceHigh':
@@ -150,7 +249,12 @@ export const TaskBrowsePage: React.FC = () => {
       default:
         return dateB - dateA;
     }
-  });
+  }), [browseVisibleTasks, filters, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTasks.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedTasks = filteredTasks.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+  const visiblePages = getVisiblePages(safePage, totalPages);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -191,40 +295,9 @@ export const TaskBrowsePage: React.FC = () => {
               Explore available tasks and connect with trusted task posters in your area
             </p>
 
-            <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
-              <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1">
-                  <Input
-                    placeholder="What are you looking for?"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-white/95 backdrop-blur-lg shadow-2xl border-0 focus:ring-2 focus:ring-white/30 h-14 text-lg"
-                    leftIcon={<MagnifyingGlassIcon className="w-6 h-6 text-gray-400" />}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      <MapPinIcon className="w-6 h-6" />
-                    </span>
-                    <select
-                      value={locationQuery}
-                      onChange={(e) => setLocationQuery(e.target.value)}
-                      className="w-full bg-white/95 backdrop-blur-lg shadow-2xl border-0 focus:ring-2 focus:ring-white/30 h-14 text-lg rounded-xl pl-12 pr-4 text-gray-700"
-                    >
-                      {locationOptions.map((option) => (
-                        <option key={option || 'all'} value={option}>
-                          {option || 'All locations'}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 shadow-2xl px-8 h-14 text-lg font-semibold border-0">
-                  Search Tasks
-                </Button>
-              </div>
-            </form>
+            <div className="max-w-3xl mx-auto rounded-2xl border border-white/30 bg-white/10 px-6 py-4 text-white/90">
+              Use the sticky filter panel below for search, location, category, status, and budget.
+            </div>
             
             {/* Quick Stats */}
             <div className="flex items-center justify-center gap-8 mt-8 text-white/80 text-sm">
@@ -247,17 +320,52 @@ export const TaskBrowsePage: React.FC = () => {
 
       {/* Filters & Tasks */}
       <div className="relative container mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-12 gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-4 shadow-lg border-0 bg-white/95 backdrop-blur-sm">
-              <div className="p-6">
+          <div className="lg:col-span-4">
+            <Card className="sticky top-24 shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+              <div className="p-7 max-h-[calc(100vh-7rem)] overflow-y-auto">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-blue-500 rounded-lg">
                     <FunnelIcon className="w-5 h-5 text-white" />
                   </div>
                   <h2 className="text-lg font-bold text-gray-900">Filters</h2>
                 </div>
+
+                <form onSubmit={handleSearch} className="mb-8 space-y-3">
+                  <Input
+                    placeholder="Search by title/description"
+                    value={effectiveSearch}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setIsSearchDraftDirty(true);
+                    }}
+                    className="h-10 border-gray-200 focus:ring-2 focus:ring-blue-500"
+                    leftIcon={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <MapPinIcon className="w-4 h-4" />
+                    </span>
+                    <select
+                      value={effectiveLocation}
+                      onChange={(e) => {
+                        setLocationQuery(e.target.value);
+                        setIsSearchDraftDirty(true);
+                      }}
+                      className="w-full h-10 rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {locationOptions.map((option) => (
+                        <option key={option || 'all'} value={option}>
+                          {option || 'All locations'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button type="submit" className="w-full">
+                    Apply Search
+                  </Button>
+                </form>
                 
                 {/* Categories */}
                 <div className="mb-8">
@@ -293,16 +401,16 @@ export const TaskBrowsePage: React.FC = () => {
                 {/* Status */}
                 <div className="mb-8">
                   <h3 className="text-sm font-semibold text-gray-700 mb-4">Status</h3>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {statuses.map((status) => (
                       <button
                         key={status.value}
                         onClick={() => handleStatusClick(status.value)}
                         className={`
-                          w-full px-4 py-2.5 rounded-xl border-2 text-sm font-medium text-left transition-all duration-200
+                          w-full px-3 py-2 rounded-lg border text-sm font-medium text-center transition-all duration-200
                           ${
                             filters.status === status.value
-                              ? status.color.replace('100', '500').replace('700', '100')
+                              ? status.color
                               : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-gray-50'
                           }
                         `}
@@ -313,11 +421,11 @@ export const TaskBrowsePage: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Price Range */}
+                {/* Budget Range */}
                 <div className="mb-8">
                   <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                     <CurrencyDollarIcon className="w-4 h-4" />
-                    Price Range
+                    Budget Range
                   </h3>
                   <div className="space-y-3">
                     <Input
@@ -325,7 +433,7 @@ export const TaskBrowsePage: React.FC = () => {
                       placeholder="Min Budget"
                       value={filters.minBudget ?? ''}
                       onChange={(e) =>
-                        setFilters({
+                        applyFilterUpdate({
                           minBudget: e.target.value === '' ? undefined : Number(e.target.value),
                         })
                       }
@@ -337,7 +445,7 @@ export const TaskBrowsePage: React.FC = () => {
                       placeholder="Max Budget"
                       value={filters.maxBudget ?? ''}
                       onChange={(e) =>
-                        setFilters({
+                        applyFilterUpdate({
                           maxBudget: e.target.value === '' ? undefined : Number(e.target.value),
                         })
                       }
@@ -348,7 +456,7 @@ export const TaskBrowsePage: React.FC = () => {
                 </div>
                 
                 {/* Reset */}
-                {(filters.category || filters.status || filters.search || filters.location) && (
+                {(filters.category || filters.status || filters.search || filters.location || filters.minBudget != null || filters.maxBudget != null) && (
                   <Button
                     variant="outline"
                     onClick={handleReset}
@@ -363,7 +471,7 @@ export const TaskBrowsePage: React.FC = () => {
           </div>
 
           {/* Tasks Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-8">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -371,23 +479,55 @@ export const TaskBrowsePage: React.FC = () => {
                   {filteredTasks.length} {filteredTasks.length === 1 ? 'Task' : 'Tasks'} Found
                 </h2>
                 <p className="text-gray-600 mt-1">
-                  {filters.category || filters.status || filters.search || filters.location || filters.minBudget != null || filters.maxBudget != null
+                  {browseMode === 'suggested'
+                    ? 'Suggested for you based on your specialties and district'
+                    : (filters.category || filters.status || filters.search || filters.location || filters.minBudget != null || filters.maxBudget != null
                     ? 'Matching your filters'
-                    : 'Showing all available tasks'}
+                    : 'Showing all available tasks')}
                 </p>
               </div>
               
               {/* Sort Options */}
               <div className="flex items-center gap-3">
+                {String(user?.role || '').toUpperCase() === 'PROVIDER' && (
+                  <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+                    <button
+                      onClick={() => {
+                        setBrowseMode('all');
+                        setCurrentPage(1);
+                      }}
+                      className={`px-3 py-1.5 text-sm rounded-md ${
+                        browseMode === 'all' ? 'bg-blue-600 text-white' : 'text-gray-600'
+                      }`}
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => {
+                        setBrowseMode('suggested');
+                        setCurrentPage(1);
+                      }}
+                      className={`px-3 py-1.5 text-sm rounded-md ${
+                        browseMode === 'suggested' ? 'bg-blue-600 text-white' : 'text-gray-600'
+                      }`}
+                    >
+                      Suggested
+                    </button>
+                  </div>
+                )}
                 <span className="text-sm text-gray-600">Sort by:</span>
                 <select 
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 >
+                  <option value="opportunity">Best Opportunities</option>
                   <option value="recent">Most Recent</option>
-                  <option value="priceLow">Price: Low to High</option>
-                  <option value="priceHigh">Price: High to Low</option>
+                  <option value="priceLow">Budget: Low to High</option>
+                  <option value="priceHigh">Budget: High to Low</option>
                   <option value="deadline">Deadline</option>
                 </select>
               </div>
@@ -404,7 +544,7 @@ export const TaskBrowsePage: React.FC = () => {
             ) : filteredTasks.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredTasks.map((task) => (
+                  {paginatedTasks.map((task) => (
                     <TaskCard
                       key={task.id}
                       task={task}
@@ -416,16 +556,43 @@ export const TaskBrowsePage: React.FC = () => {
                 {/* Pagination */}
                 <div className="flex justify-center mt-12">
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" className="border-gray-200 text-gray-600 hover:bg-gray-50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage <= 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      className="border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       Previous
                     </Button>
                     <div className="flex items-center space-x-1">
-                      <button className="w-10 h-10 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600">1</button>
-                      <button className="w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">2</button>
-                      <button className="w-10 h-10 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">3</button>
-                      <span className="px-2 text-gray-400">...</span>
+                      {visiblePages.map((page, index) =>
+                        page === '...' ? (
+                          <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                              page === safePage
+                                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
                     </div>
-                    <Button variant="outline" size="sm" className="border-gray-200 text-gray-600 hover:bg-gray-50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={safePage >= totalPages}
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      className="border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       Next
                     </Button>
                   </div>

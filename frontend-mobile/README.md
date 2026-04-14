@@ -39,8 +39,27 @@ A React Native mobile application for task management built with Expo, TypeScrip
 
 4. **Run on your platform**:
    - **iOS**: Press `i` in the terminal or run `npm run ios`
-   - **Android**: Press `a` in the terminal or run `npm run android`
+   - **iOS via LAN (physical iPhone/iPad)**: run `npm run ios:lan`
+   - **Real iPad from Windows/macOS (Expo Go, recommended)**: run `npm run ipad`
+- **Android Emulator (recommended)**: Press `a` in the terminal or run `npm run android`
+  - `npm run android` now auto-detects `adb`:
+    - if `adb` is available, it opens Android emulator directly
+    - if `adb` is missing, it falls back to Expo LAN mode for QR testing on Android device
+   - **Android via LAN (physical device)**: run `npm run android:lan`
    - **Web**: Press `w` in the terminal or run `npm run web`
+
+### Windows Quick Run
+
+1. Open Android Emulator first (Android Studio).
+2. In `frontend-mobile`:
+```bash
+npm install
+npm run android
+```
+3. To open on real iPad/iPhone from Windows (Expo Go):
+```bash
+npm run ipad
+```
 
 ## 📂 Project Structure
 
@@ -86,8 +105,23 @@ npm start
 # Run on iOS simulator
 npm run ios
 
+# Run on iOS via LAN (real iPhone/iPad on same Wi-Fi)
+npm run ios:lan
+
+# Run on real iPad/iPhone via Expo Go + tunnel (works from Windows too)
+npm run ipad
+
 # Run on Android emulator
 npm run android
+
+# Run Android using LAN host (for real device on same Wi-Fi)
+npm run android:lan
+
+# Native Android build flow (requires full Android SDK/Gradle setup)
+npm run android:native
+
+# Native iOS build flow (requires full Xcode setup)
+npm run ios:native
 
 # Run on web browser
 npm run web
@@ -117,6 +151,10 @@ Create a `.env.local` file in the project root:
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:4000/api
 ```
+
+Notes:
+- Android emulator automatically maps `localhost` API host to `10.0.2.2`
+- Real device on same Wi-Fi uses Expo LAN host rewrite automatically
 
 ### API Configuration
 
@@ -264,6 +302,30 @@ Reset the emulator:
 ```bash
 emulator -avd <emulator_name> -wipe-data
 ```
+
+If Expo shows `Could not connect to the server` on Android, use localhost mode:
+```bash
+npm run android
+```
+and avoid `run:android` unless you need a native build.
+
+#### iPad Simulator (macOS)
+To test on iPad, boot an iPad simulator in Xcode first, then run:
+```bash
+npm run ios
+```
+Expo will open on the active iOS simulator.
+
+#### Real iPad from Windows/macOS (Expo Go)
+1. Start:
+```bash
+npm run ipad
+```
+2. Install Expo Go on iPad.
+3. Scan the QR code from terminal/browser.
+4. App opens directly on iPad (no Xcode required).
+
+Note: `npm run ipad` tunnels the Expo app bundle only. If your backend API is still running on your local machine, set `EXPO_PUBLIC_API_URL` to your computer's current LAN IP and prefer `npm start` or `npm run ipad:lan` while the iPad is on the same Wi-Fi.
 
 ## 📚 Resources
 

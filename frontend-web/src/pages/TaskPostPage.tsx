@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useTaskStore } from '../stores/task.store';
+import { useAuthStore } from '../stores/auth.store';
 import { api } from '../services/api';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { Card } from '../components/common/Card';
+import { uploadImageToCloudinary } from '../utils/cloudinaryUpload';
 import toast from 'react-hot-toast';
 import {
   SparklesIcon,
@@ -30,23 +32,86 @@ interface TaskFormData {
   latitude?: number;
   longitude?: number;
   budget?: number;
+  maxBids?: number;
   deadline?: string;
   imageUrls?: string[];
+}
+
+function formatVndInput(value?: number): string {
+  if (!value || value <= 0) return '';
+  return value.toLocaleString('en-US');
+}
+
+function parseVndInput(rawValue: string): number | undefined {
+  const digitsOnly = rawValue.replace(/\D/g, '');
+  if (!digitsOnly) return undefined;
+  const parsed = Number.parseInt(digitsOnly, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined;
+  return parsed;
+}
+
+function getDateTimeLocalNow(): string {
+  const now = new Date();
+  const tzOffsetMs = now.getTimezoneOffset() * 60 * 1000;
+  const localNow = new Date(now.getTime() - tzOffsetMs);
+  return localNow.toISOString().slice(0, 16);
 }
 
 export const TaskPostPage: React.FC = () => {
   const navigate = useNavigate();
   const { createTask, tasks } = useTaskStore();
-  const [aiPrice, setAiPrice] = useState<number | null>(null);
-  const [isGettingAiPrice, setIsGettingAiPrice] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const [aiBudgetSuggestion, setAiBudgetSuggestion] = useState<{
+    suggestedBudget: number;
+    suggestedMin?: number;
+    suggestedMax?: number;
+    currency?: string;
+    explanation?: string;
+    factorsUsed?: string[];
+  } | null>(null);
+  const [isGettingAiBudgetSuggestion, setIsGettingAiBudgetSuggestion] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+  const minDeadlineValue = getDateTimeLocalNow();
+  const districtOptions = [
+    'District 1',
+    'District 2',
+    'District 3',
+    'District 4',
+    'District 5',
+    'District 6',
+    'District 7',
+    'District 8',
+    'District 9',
+    'District 10',
+    'District 11',
+    'District 12',
+    'Binh Thanh',
+    'Phu Nhuan',
+    'Go Vap',
+    'Tan Binh',
+    'Tan Phu',
+    'Thu Duc',
+  ];
   const categoryCounts = tasks.reduce<Record<string, number>>((acc, task) => {
     acc[task.category] = (acc[task.category] || 0) + 1;
     return acc;
   }, {});
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<TaskFormData>();
+  const { control, register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<TaskFormData>();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    const role = String(user.role || '').toUpperCase();
+    if (role !== 'REQUESTER' && role !== 'CLIENT') {
+      toast.error('Only requesters can post tasks');
+      navigate('/browse-tasks');
+    }
+  }, [navigate, user]);
 
   const categories = [
     { value: 'DELIVERY', label: 'Delivery', icon: '🚚', color: 'bg-blue-50 text-blue-600' },
@@ -59,46 +124,113 @@ export const TaskPostPage: React.FC = () => {
     { value: 'OTHER', label: 'Other', icon: '⭐', color: 'bg-gray-50 text-gray-600' },
   ];
 
-  const handleGetAiPrice = async () => {
+  const handleGetAiBudgetSuggestion = async () => {
     const formData = watch();
     if (!formData.category || !formData.location) {
       toast.error('Please select category and location first');
       return;
     }
 
-    setIsGettingAiPrice(true);
+    setIsGettingAiBudgetSuggestion(true);
     try {
+      const title = String(formData.title || '').trim();
+      const description = String(formData.description || '').trim();
       const response = await api.ai.predictPrice({
+        title,
         category: formData.category,
         location: formData.location,
         budget: formData.budget,
+        description: [title, description].filter(Boolean).join('. '),
         complexity: 'MEDIUM',
         urgency: 'NORMAL',
       });
-      setAiPrice(response.data.aiSuggestedPrice);
-      toast.success('AI price suggestion generated!');
+      setAiBudgetSuggestion({
+        suggestedBudget: Number(response.data?.suggestedBudget || response.data?.aiSuggestedPrice || 0),
+        suggestedMin: response.data?.suggestedMin != null ? Number(response.data.suggestedMin) : undefined,
+        suggestedMax: response.data?.suggestedMax != null ? Number(response.data.suggestedMax) : undefined,
+        currency: response.data?.currency || 'VND',
+        explanation: response.data?.explanation || response.data?.rationale || '',
+        factorsUsed: Array.isArray(response.data?.factorsUsed) ? response.data.factorsUsed : [],
+      });
+      toast.success('AI budget suggestion generated');
     } catch (error) {
-      toast.error('Failed to get AI price suggestion');
+      toast.error('Failed to get AI budget suggestion');
     } finally {
-      setIsGettingAiPrice(false);
+      setIsGettingAiBudgetSuggestion(false);
     }
   };
 
   const onSubmit = async (data: TaskFormData) => {
+    if (imageUrls.length > 3) {
+      toast.error('You can upload up to 3 task images');
+      return;
+    }
+    if (!user?.id) {
+      toast.error('Please log in to post a task');
+      return;
+    }
+
     try {
       const taskData = {
         ...data,
         budget: data.budget ? Number(data.budget) : undefined,
-        aiSuggestedPrice: aiPrice,
+        maxBids: data.maxBids ? Number(data.maxBids) : undefined,
+        // Backend schema accepts number or undefined. Do not send null.
+        aiSuggestedPrice: aiBudgetSuggestion?.suggestedBudget ?? undefined,
         imageUrls,
-        createdById: 2,
       };
 
       const task = await createTask(taskData);
       toast.success('Task posted successfully!');
       navigate(`/tasks/${task.id}`);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to post task');
+      const details = error?.response?.data?.details;
+      const firstDetailMessage =
+        Array.isArray(details) && details.length > 0
+          ? details[0]?.message
+          : null;
+      const message =
+        error?.response?.data?.message ||
+        firstDetailMessage ||
+        error?.message ||
+        'Failed to post task';
+      toast.error(message);
+    }
+  };
+
+  const handleTaskImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    const remainingSlots = 3 - imageUrls.length;
+    if (selectedFiles.length > remainingSlots) {
+      const message = `You can upload only ${remainingSlots} more image${remainingSlots === 1 ? '' : 's'}.`;
+      setImageUploadError(message);
+      toast.error(message);
+      event.target.value = '';
+      return;
+    }
+
+    setIsUploadingImages(true);
+    setImageUploadError(null);
+
+    try {
+      // Upload selected files directly to Cloudinary first, then keep only secure URLs.
+      const uploadedUrls = await Promise.all(
+        selectedFiles.map((file) => uploadImageToCloudinary(file))
+      );
+      setImageUrls((prev) => [...prev, ...uploadedUrls]);
+      toast.success(`Uploaded ${uploadedUrls.length} image${uploadedUrls.length > 1 ? 's' : ''}`);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Image upload failed. Please try again.';
+      setImageUploadError(message);
+      toast.error(message);
+    } finally {
+      setIsUploadingImages(false);
+      event.target.value = '';
     }
   };
 
@@ -196,26 +328,26 @@ export const TaskPostPage: React.FC = () => {
                     <PaperClipIcon className="w-5 h-5 text-blue-600" />
                     Task Images (max 3)
                   </label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={imageUrlInput}
-                      onChange={(event) => setImageUrlInput(event.target.value)}
-                      placeholder="Paste image URL"
-                      className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
+                  <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleTaskImageUpload}
+                      disabled={isUploadingImages || imageUrls.length >= 3}
+                      className="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-white hover:file:bg-blue-700 disabled:cursor-not-allowed"
                     />
-                    <Button
-                      type="button"
-                      disabled={!imageUrlInput.trim() || imageUrls.length >= 3}
-                      onClick={() => {
-                        if (!imageUrlInput.trim() || imageUrls.length >= 3) return;
-                        setImageUrls((prev) => [...prev, imageUrlInput.trim()]);
-                        setImageUrlInput('');
-                      }}
-                    >
-                      Add
-                    </Button>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Files are uploaded directly to Cloudinary and previewed before submit.
+                    </p>
                   </div>
                   <p className="text-sm text-gray-500">{imageUrls.length}/3</p>
+                  {isUploadingImages && (
+                    <p className="text-sm text-blue-600">Uploading image(s)...</p>
+                  )}
+                  {imageUploadError && (
+                    <p className="text-sm text-red-600">{imageUploadError}</p>
+                  )}
                   {imageUrls.length > 0 && (
                     <div className="grid grid-cols-3 gap-3">
                       {imageUrls.map((url, index) => (
@@ -238,9 +370,6 @@ export const TaskPostPage: React.FC = () => {
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400">
-                    Upload is disabled for now. Paste direct image URLs.
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -293,13 +422,30 @@ export const TaskPostPage: React.FC = () => {
                       <MapPinIcon className="w-5 h-5 text-blue-600" />
                       Location *
                     </label>
-                    <Input
-                      {...register('location', { required: 'Location is required' })}
-                      placeholder="e.g., District 1, Ho Chi Minh City"
-                      className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
-                      leftIcon={<MapPinIcon className="w-5 h-5 text-gray-400" />}
-                      error={errors.location?.message}
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <MapPinIcon className="w-5 h-5" />
+                      </span>
+                      <select
+                        {...register('location', { required: 'Location is required' })}
+                        className="w-full h-12 text-lg border border-gray-200 rounded-xl pl-11 pr-4 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>
+                          Select district
+                        </option>
+                        {districtOptions.map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {errors.location && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <span>⚠️</span> {errors.location.message}
+                      </p>
+                    )}
                     <div className="bg-green-50 rounded-lg p-3 border border-green-100">
                       <p className="text-sm text-green-700 flex items-center gap-2">
                         <UserGroupIcon className="w-4 h-4" />
@@ -310,27 +456,6 @@ export const TaskPostPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Budget */}
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                      <CurrencyDollarIcon className="w-5 h-5 text-blue-600" />
-                      Your Budget (USD)
-                    </label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      {...register('budget', { min: 1 })}
-                      placeholder="e.g., 50.00"
-                      className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
-                      leftIcon={<CurrencyDollarIcon className="w-5 h-5 text-gray-400" />}
-                      error={errors.budget?.message}
-                    />
-                    <p className="text-sm text-gray-500 flex items-center gap-1">
-                      <ArrowRightIcon className="w-4 h-4" />
-                      Leave empty for flexible budget
-                    </p>
-                  </div>
-
                   {/* Deadline */}
                   <div className="space-y-3">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
@@ -339,10 +464,23 @@ export const TaskPostPage: React.FC = () => {
                     </label>
                     <Input
                       type="datetime-local"
-                      {...register('deadline')}
+                      min={minDeadlineValue}
+                      {...register('deadline', {
+                        validate: (value) => {
+                          if (!value) return true;
+                          const selected = new Date(value);
+                          if (Number.isNaN(selected.getTime())) return 'Invalid deadline';
+                          return selected.getTime() >= Date.now() || 'Deadline cannot be in the past';
+                        },
+                      })}
                       className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
                       leftIcon={<CalendarIcon className="w-5 h-5 text-gray-400" />}
                     />
+                    {errors.deadline && (
+                      <p className="text-sm text-red-600 flex items-center gap-1">
+                        <span>⚠️</span> {errors.deadline.message}
+                      </p>
+                    )}
                     <div className="bg-orange-50 rounded-lg p-3 border border-orange-100">
                       <p className="text-sm text-orange-700 flex items-center gap-2">
                         <ClockIcon className="w-4 h-4" />
@@ -352,7 +490,7 @@ export const TaskPostPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* AI Price Suggestion */}
+                {/* AI Budget Suggestion */}
                 <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-dashed border-blue-200 rounded-2xl p-8">
                   <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
                     <div className="flex items-center">
@@ -360,17 +498,17 @@ export const TaskPostPage: React.FC = () => {
                         <SparklesIcon className="w-7 h-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">AI Price Suggestion</h3>
-                        <p className="text-sm text-gray-600">Get an AI-powered price estimate based on market data</p>
+                        <h3 className="text-lg font-bold text-gray-900">AI Budget Suggestion</h3>
+                        <p className="text-sm text-gray-600">Get AI budget guidance based on market data</p>
                       </div>
                     </div>
                     <Button
                       type="button"
-                      onClick={handleGetAiPrice}
-                      disabled={isGettingAiPrice}
+                      onClick={handleGetAiBudgetSuggestion}
+                      disabled={isGettingAiBudgetSuggestion}
                       className="bg-white border-blue-200 text-blue-600 hover:bg-blue-50 shadow-lg px-6"
                     >
-                      {isGettingAiPrice ? (
+                      {isGettingAiBudgetSuggestion ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
                           Analyzing...
@@ -378,40 +516,121 @@ export const TaskPostPage: React.FC = () => {
                       ) : (
                         <>
                           <SparklesIcon className="w-4 h-4 mr-2" />
-                          Get AI Price
+                          Get AI Budget
                         </>
                       )}
                     </Button>
                   </div>
 
-                  {aiPrice ? (
+                  {aiBudgetSuggestion ? (
                     <div className="bg-white rounded-xl p-6 border-2 border-green-200 shadow-lg">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
                           <p className="text-sm text-gray-500 mb-2 flex items-center gap-1">
                             <SparklesIcon className="w-4 h-4" />
-                            AI Suggested Price
+                            Suggested Budget
                           </p>
-                          <p className="text-4xl font-bold text-green-600">${aiPrice.toFixed(2)}</p>
+                          <p className="text-4xl font-bold text-green-600">
+                            {aiBudgetSuggestion.suggestedBudget.toLocaleString('en-US')} VND
+                          </p>
+                          {aiBudgetSuggestion.suggestedMin != null && aiBudgetSuggestion.suggestedMax != null ? (
+                            <p className="text-sm text-gray-700 mt-1">
+                              Estimated Budget Range: {aiBudgetSuggestion.suggestedMin.toLocaleString('en-US')} - {aiBudgetSuggestion.suggestedMax.toLocaleString('en-US')} VND
+                            </p>
+                          ) : null}
                           <p className="text-sm text-gray-600 mt-2">
-                            Based on market rates, task complexity, and location
+                            {aiBudgetSuggestion.explanation || 'Based on category, title details, and task scope.'}
                           </p>
+                          {aiBudgetSuggestion.factorsUsed?.length ? (
+                            <p className="text-xs text-gray-500 mt-2">
+                              Factors: {aiBudgetSuggestion.factorsUsed.slice(0, 4).join(' · ')}
+                            </p>
+                          ) : null}
+                          <div className="mt-4">
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                setValue('budget', aiBudgetSuggestion.suggestedBudget, { shouldValidate: true, shouldDirty: true });
+                                toast.success('Suggested budget applied!');
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-md px-5 py-2 flex items-center gap-2"
+                            >
+                              <CheckCircleIcon className="w-5 h-5" />
+                              Apply Suggestion
+                            </Button>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-lg">
                           <CheckCircleIcon className="w-6 h-6 text-green-500" />
-                          <span className="text-green-700 font-semibold">Price optimized</span>
+                          <span className="text-green-700 font-semibold">Budget guidance ready</span>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div className="bg-white/80 rounded-xl p-6 text-center border border-blue-100">
                       <SparklesIcon className="w-12 h-12 text-blue-400 mx-auto mb-3" />
-                      <p className="text-gray-700 font-medium mb-2">Smart Pricing</p>
+                      <p className="text-gray-700 font-medium mb-2">Budget Guidance</p>
                       <p className="text-sm text-gray-600">
-                        Get an AI-powered price suggestion based on thousands of similar tasks in your area
+                        Get an AI-powered budget suggestion based on similar tasks in your area
                       </p>
                     </div>
                   )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                      <CurrencyDollarIcon className="w-5 h-5 text-blue-600" />
+                      Set Budget (VND)
+                    </label>
+                    <Controller
+                      name="budget"
+                      control={control}
+                      rules={{
+                        required: 'Budget is required',
+                        min: { value: 1, message: 'Budget must be greater than 0' },
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9,]*"
+                          value={formatVndInput(field.value)}
+                          onChange={(event) => field.onChange(parseVndInput(event.target.value))}
+                          onBlur={field.onBlur}
+                          placeholder="e.g., 500,000"
+                          className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
+                          leftIcon={<CurrencyDollarIcon className="w-5 h-5 text-gray-400" />}
+                          error={errors.budget?.message}
+                        />
+                      )}
+                    />
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <ArrowRightIcon className="w-4 h-4" />
+                      Enter your estimated budget in VND (e.g., 500,000)
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                      <UserGroupIcon className="w-5 h-5 text-blue-600" />
+                      Maximum number of bids
+                    </label>
+                    <Input
+                      type="number"
+                      step="1"
+                      {...register('maxBids', {
+                        min: { value: 1, message: 'Bid limit must be at least 1' },
+                        max: { value: 100, message: 'Bid limit cannot be more than 100' },
+                      })}
+                      placeholder="Default: 30"
+                      className="h-12 text-lg border-gray-200 focus:ring-2 focus:ring-blue-500"
+                      error={errors.maxBids?.message}
+                    />
+                    <p className="text-sm text-gray-500">
+                      You can limit how many providers can bid on this task (maximum 100).
+                    </p>
+                  </div>
                 </div>
 
                 {/* Submit */}
@@ -477,41 +696,6 @@ export const TaskPostPage: React.FC = () => {
                     <p className="text-sm text-gray-700">Set realistic deadlines for quality work</p>
                   </div>
                 </div>
-              </div>
-            </Card>
-            
-            {/* Stats Card */}
-            <Card className="bg-white shadow-lg border-0">
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Platform Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Active Providers</span>
-                    <span className="text-lg font-bold text-blue-600">300+</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Avg. Response Time</span>
-                    <span className="text-lg font-bold text-green-600">15 min</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Success Rate</span>
-                    <span className="text-lg font-bold text-purple-600">98%</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-            
-            {/* Support Card */}
-            <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-100 shadow-lg">
-              <div className="p-6 text-center">
-                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <UserGroupIcon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Need Help?</h3>
-                <p className="text-sm text-gray-600 mb-4">Our support team is available 24/7 to assist you</p>
-                <Button variant="outline" className="w-full border-yellow-200 text-yellow-700 hover:bg-yellow-50">
-                  Contact Support
-                </Button>
               </div>
             </Card>
           </div>

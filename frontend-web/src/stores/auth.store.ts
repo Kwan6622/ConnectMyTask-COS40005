@@ -71,8 +71,13 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem('accessToken', response.data.accessToken);
           storage.set('auth_token', response.data.accessToken);
         } catch (error: any) {
+          const message =
+            error?.response?.data?.message ||
+            error?.response?.data?.error ||
+            error?.message ||
+            'Registration failed';
           set({ 
-            error: error.message || 'Registration failed', 
+            error: message, 
             isLoading: false 
           });
           throw error;

@@ -42,6 +42,7 @@ export const LoginPage: React.FC = () => {
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
+        error?.message ||
         'Login failed. Please try again.';
       setAuthMessage(message);
     } finally {
@@ -67,7 +68,20 @@ export const LoginPage: React.FC = () => {
       setIsLogin(true);
       signupForm.reset();
     } catch (error: any) {
-      toast.error(error.message || 'Signup failed. Please try again.');
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Signup failed. Please try again.';
+      const normalized = String(backendMessage).toLowerCase();
+      if (
+        normalized.includes('email already') ||
+        normalized.includes('already registered') ||
+        normalized.includes('already exists')
+      ) {
+        toast.error('This email is already registered. Please use a different email.');
+      } else {
+        toast.error(backendMessage);
+      }
     } finally {
       setIsLoading(false);
     }

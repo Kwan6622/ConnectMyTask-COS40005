@@ -3,15 +3,8 @@ import { useAuthStore } from '../stores/auth.store';
 import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
-  const { user, isAuthenticated, isLoading } = useAuthStore();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Auto-fetch user if token exists
-      useAuthStore.getState().fetchCurrentUser();
-    }
-  }, []);
+  const { user, accessToken, isLoading } = useAuthStore();
+  const isAuthenticated = Boolean(user && accessToken);
 
   return { user, isAuthenticated, isLoading };
 };
@@ -22,14 +15,15 @@ export const useRequireAuth = () => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate('/login', { replace: true });
+      // Keep guest browsing friendly: unauthenticated users are redirected to home, not forced to login.
+      navigate('/', { replace: true });
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return { user, isAuthenticated, isLoading };
 };
 
-export const useRequireRole = (role: 'CLIENT' | 'PROVIDER' | 'ADMIN') => {
+export const useRequireRole = (role: 'CLIENT' | 'PROVIDER' | 'ADMIN' | 'REQUESTER') => {
   const { user, isAuthenticated, isLoading } = useRequireAuth();
   const navigate = useNavigate();
 
@@ -37,7 +31,7 @@ export const useRequireRole = (role: 'CLIENT' | 'PROVIDER' | 'ADMIN') => {
     if (!isLoading && user && user.role !== role) {
       navigate('/', { replace: true });
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, role, navigate]);
 
   return { user, isAuthenticated, isLoading };
 };

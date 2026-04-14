@@ -14,7 +14,11 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "com.connectmytask.mobile"
+      "bundleIdentifier": "com.connectmytask.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ConnectMyTask needs access to your location to verify task presence.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "ConnectMyTask needs access to your location to verify task presence."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -32,6 +36,14 @@
         "expo-router",
         {
           "origin": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "ConnectMyTask needs access to your location to verify task presence.",
+          "locationAlwaysPermission": "ConnectMyTask needs access to your location to verify task presence.",
+          "locationWhenInUsePermission": "ConnectMyTask needs access to your location to verify task presence."
         }
       ]
     ]

@@ -6,6 +6,13 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "mobile:start": "npm --prefix frontend-mobile run start",
+    "mobile:start:tunnel": "npm --prefix frontend-mobile run start:tunnel",
+    "mobile:android": "npm --prefix frontend-mobile run android",
+    "mobile:android:lan": "npm --prefix frontend-mobile run android:lan",
+    "mobile:ios": "npm --prefix frontend-mobile run ios",
+    "mobile:ipad": "npm --prefix frontend-mobile run ipad",
+    "mobile:web": "npm --prefix frontend-mobile run web",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
@@ -34,6 +41,7 @@
     "pg": "^8.18.0",
     "prisma": "^6.19.2",
     "socket.io": "^4.8.3",
+    "stripe": "^18.5.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

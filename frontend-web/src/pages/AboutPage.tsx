@@ -24,9 +24,9 @@ export const AboutPage: React.FC = () => {
               </p>
             </div>
             <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-emerald-50 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Transparent pricing</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Transparent budgeting</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Set your budget, compare bids, and use AI suggestions to price tasks more confidently.
+                Set your budget, compare bids, and use AI budget guidance more confidently.
               </p>
             </div>
             <div className="rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-orange-50 p-6">

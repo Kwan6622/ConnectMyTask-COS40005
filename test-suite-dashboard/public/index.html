@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectMyTask - Quality Assurance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <header>
+            <div class="branding">
+                <div class="logo-circle">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h1>System Diagnostics</h1>
+            </div>
+            <button id="runTestsBtn" class="primary-btn">
+                <span class="btn-text">Run Analytics Suite</span>
+                <div class="loader hidden"></div>
+            </button>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card glassmorphism">
+                <h3 class="stat-title">Total Tests</h3>
+                <p class="stat-value" id="stat-total">0</p>
+            </div>
+            <div class="stat-card glassmorphism">
+                <h3 class="stat-title">Passed Status</h3>
+                <p class="stat-value text-success" id="stat-passed">0</p>
+            </div>
+            <div class="stat-card glassmorphism">
+                <h3 class="stat-title">Failed Issues</h3>
+                <p class="stat-value text-danger" id="stat-failed">0</p>
+            </div>
+            <div class="stat-card glassmorphism">
+                <h3 class="stat-title">Execution Time</h3>
+                <p class="stat-value" id="stat-duration">0ms</p>
+            </div>
+        </div>
+
+        <div class="results-container glassmorphism">
+            <div class="results-header">
+                <h2>Diagnostic Output</h2>
+                <span class="badge" id="statusBadge">Idle</span>
+            </div>
+            
+            <div id="resultsList" class="results-list">
+                <div class="empty-state">
+                    <p>Click "Run Analytics Suite" to commence execution</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

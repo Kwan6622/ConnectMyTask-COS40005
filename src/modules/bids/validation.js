@@ -1,9 +1,9 @@
 const { z } = require('zod');
 
 const createBidSchema = z.object({
-  taskId: z.number().int().positive(),
-  providerId: z.number().int().positive(),
-  price: z.number().positive(),
+  amount: z.number().positive(),
+  message: z.string().max(1200).optional(),
+  estimatedCompletionTime: z.string().max(100).optional(),
 });
 
 const bidIdParamsSchema = z.object({
