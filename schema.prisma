@@ -1,0 +1,490 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  email               String    @unique
+  passwordHash        String
+  role                String
+  phone               String?
+  skills              String?
+  bio                 String?
+  availability        String?
+  rating              Float?    @default(0)
+  failedLoginAttempts Int       @default(0)
+  lockoutUntil        DateTime?
+  profilePhotoUrl     String?
+
+  tasksCreated          Task[]                @relation("TasksCreated")
+  chatHistory           ChatHistory[]
+  tasksAssigned         Task[]                @relation("TasksAssigned")
+  bids                  Bid[]
+  reviewsGiven          Review[]              @relation("ReviewsGiven")
+  ratingsGiven          Rating[]              @relation("RatingsGiven")
+  ratingsReceived       Rating[]              @relation("RatingsReceived")
+  trackingLogs          TrackingLog[]
+  notificationsReceived Notification[]        @relation("NotificationRecipient")
+  notificationsSent     Notification[]        @relation("NotificationSender")
+  savedTasks            SavedTask[]
+  paymentsAsPayer       PaymentTransaction[]  @relation("PaymentPayer")
+  paymentsAsProvider    PaymentTransaction[]  @relation("PaymentProvider")
+  progressUpdates       TaskProgressUpdate[]
+  disputesOpened        Dispute[]             @relation("DisputeOpenedBy")
+  disputesResolved      Dispute[]             @relation("DisputeResolvedBy")
+  activityLogs          TaskActivityLog[]     @relation("TaskActivityActor")
+  providerProfile       ProviderProfile?
+  providerCertificates  ProviderCertificate[] @relation("ProviderCertificates")
+  verifiedCertificates  ProviderCertificate[] @relation("CertificateVerifiedBy")
+
+  @@map("USERS")
+}
+
+model ChatHistory {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("CHAT_HISTORY")
+}
+
+model ProviderProfile {
+  id                     Int      @id @default(autoincrement())
+  userId                 Int      @unique
+  address                String?
+  district               String?
+  city                   String?
+  specialties            String[] @default([])
+  safetyComplianceAgreed Boolean  @default(false)
+  shortBio               String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user         User                  @relation(fields: [userId], references: [id])
+  certificates ProviderCertificate[] @relation("ProfileCertificates")
+
+  @@index([district])
+  @@map("PROVIDER_PROFILES")
+}
+
+model ProviderCertificate {
+  id                 Int                           @id @default(autoincrement())
+  providerId         Int
+  providerProfileId  Int?
+  title              String
+  fileUrl            String
+  certificateType    String
+  verificationStatus CertificateVerificationStatus @default(PENDING)
+  rejectionReason    String?
+  uploadedAt         DateTime                      @default(now())
+  verifiedAt         DateTime?
+  verifiedByAdminId  Int?
+
+  provider        User             @relation("ProviderCertificates", fields: [providerId], references: [id])
+  providerProfile ProviderProfile? @relation("ProfileCertificates", fields: [providerProfileId], references: [id])
+  verifiedByAdmin User?            @relation("CertificateVerifiedBy", fields: [verifiedByAdminId], references: [id])
+
+  @@index([providerId, uploadedAt])
+  @@index([verificationStatus])
+  @@map("PROVIDER_CERTIFICATES")
+}
+
+model Task {
+  id                 Int               @id @default(autoincrement())
+  title              String
+  description        String
+  category           String
+  budget             Float
+  maxBids            Int               @default(30)
+  isSuspicious       Boolean           @default(false)
+  suspiciousReason   String?
+  riskLevel          String?
+  location           String
+  status             TaskStatus        @default(PENDING)
+  dueDate            DateTime?
+  biddingStartedAt   DateTime?
+  biddingEndsAt      DateTime?
+  isOverdue          Boolean           @default(false)
+  overdueNotifiedAt  DateTime?
+  escrowStatus       EscrowStatus      @default(NONE)
+  paymentStatus      TaskPaymentStatus @default(UNPAID)
+  escrowAmount       Float?
+  escrowHeldAt       DateTime?
+  escrowReleasedAt   DateTime?
+  canceledAt         DateTime?
+  cancellationReason String?
+  isDeleted          Boolean           @default(false)
+  deletedAt          DateTime?
+  reviewedByAdminAt  DateTime?
+  reviewedByAdminId  Int?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  imageUrls          String[]          @default([])
+
+  createdById Int
+  createdBy   User @relation("TasksCreated", fields: [createdById], references: [id])
+
+  assignedProviderId Int?
+  assignedProvider   User? @relation("TasksAssigned", fields: [assignedProviderId], references: [id])
+
+  bids            Bid[]
+  reviews         Review[]
+  ratings         Rating[]
+  trackingLogs    TrackingLog[]
+  aiInsights      AiInsight[]
+  notifications   Notification[]
+  savedByUsers    SavedTask[]
+  payments        PaymentTransaction[]
+  progressUpdates TaskProgressUpdate[]
+  subtasks        TaskSubtask[]
+  disputes        Dispute[]
+  activityLogs    TaskActivityLog[]
+  translations    TaskTranslation[]
+
+  @@map("TASKS")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  recipientId Int
+  recipient   User @relation("NotificationRecipient", fields: [recipientId], references: [id])
+
+  senderId Int?
+  sender   User? @relation("NotificationSender", fields: [senderId], references: [id])
+
+  taskId Int?
+  task   Task? @relation(fields: [taskId], references: [id])
+
+  @@map("NOTIFICATIONS")
+}
+
+model SavedTask {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  @@unique([userId, taskId])
+  @@map("SAVED_TASKS")
+}
+
+model Bid {
+  id                      Int       @id @default(autoincrement())
+  price                   Float
+  message                 String?
+  estimatedCompletionTime String?
+  status                  BidStatus @default(PENDING)
+  createdAt               DateTime  @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  providerId Int
+  provider   User @relation(fields: [providerId], references: [id])
+
+  @@map("BIDS")
+}
+
+model TaskProgressUpdate {
+  id                      Int       @id @default(autoincrement())
+  progressPercent         Int
+  note                    String
+  attachments             String[]  @default([])
+  milestoneStatus         String?
+  estimatedCompletionDate DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  providerId Int
+  provider   User @relation(fields: [providerId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([providerId])
+  @@map("TASK_PROGRESS_UPDATES")
+}
+
+model TaskSubtask {
+  id              Int           @id @default(autoincrement())
+  title           String
+  progressPercent Int
+  status          SubtaskStatus @default(PENDING)
+  order           Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  @@index([taskId, order])
+  @@map("TASK_SUBTASKS")
+}
+
+model TaskTranslation {
+  id          Int      @id @default(autoincrement())
+  language    String   @default("en")
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, language])
+  @@index([taskId, language])
+  @@map("TASK_TRANSLATIONS")
+}
+
+model PaymentTransaction {
+  id                    Int                    @id @default(autoincrement())
+  amount                Float
+  totalAmount           Float?
+  escrowHeldAmount      Float?
+  platformFeeAmount     Float?
+  providerPayoutAmount  Float?
+  heldAt                DateTime?
+  releasedAt            DateTime?
+  lifecycleStatus       PaymentLifecycleStatus @default(PENDING)
+  method                PaymentMethod
+  type                  PaymentTransactionType @default(DIRECT_PAYMENT)
+  escrowStatus          EscrowStatus           @default(NONE)
+  providerTransactionId String?
+  checkoutSessionId     String?
+  status                PaymentStatus          @default(PENDING)
+  note                  String?
+  metadata              Json?
+  paidAt                DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  payerId Int
+  payer   User @relation("PaymentPayer", fields: [payerId], references: [id])
+
+  providerId Int?
+  provider   User? @relation("PaymentProvider", fields: [providerId], references: [id])
+
+  @@index([taskId])
+  @@index([payerId])
+  @@index([status])
+  @@map("PAYMENT_TRANSACTIONS")
+}
+
+model Dispute {
+  id           Int           @id @default(autoincrement())
+  reason       String
+  description  String?
+  evidenceUrls String[]      @default([])
+  status       DisputeStatus @default(OPEN)
+  resolution   String?
+  adminNote    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  openedById Int
+  openedBy   User @relation("DisputeOpenedBy", fields: [openedById], references: [id])
+
+  resolvedById Int?
+  resolvedBy   User? @relation("DisputeResolvedBy", fields: [resolvedById], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([openedById])
+  @@map("DISPUTES")
+}
+
+model TaskActivityLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  actorId Int?
+  actor   User? @relation("TaskActivityActor", fields: [actorId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@index([actorId])
+  @@map("TASK_ACTIVITY_LOGS")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  reviewerId Int
+  reviewer   User @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+
+  @@map("REVIEWS")
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  fromUserId Int
+  fromUser   User @relation("RatingsGiven", fields: [fromUserId], references: [id])
+
+  toUserId Int
+  toUser   User @relation("RatingsReceived", fields: [toUserId], references: [id])
+
+  @@unique([taskId, fromUserId, toUserId])
+  @@index([toUserId, createdAt])
+  @@index([taskId, createdAt])
+  @@map("RATINGS")
+}
+
+model TrackingLog {
+  id        Int      @id @default(autoincrement())
+  lat       Float
+  lng       Float
+  timestamp DateTime
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  providerId Int
+  provider   User @relation(fields: [providerId], references: [id])
+
+  @@map("TRACKING_LOGS")
+}
+
+model AiInsight {
+  id                   Int      @id @default(autoincrement())
+  suggestedPrice       Float
+  recommendedProviders Json
+  confidenceScore      Float
+  createdAt            DateTime @default(now())
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  @@map("AI_INSIGHTS")
+}
+
+enum TaskStatus {
+  PENDING
+  OPEN
+  BIDDING
+  ASSIGNED
+  IN_PROGRESS
+  PENDING_CONFIRMATION
+  COMPLETED
+  AWAITING_PAYMENT
+  PAID
+  DISPUTED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum PaymentMethod {
+  STRIPE
+  MOMO
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum EscrowStatus {
+  NONE
+  PENDING_DEPOSIT
+  HELD
+  RELEASED
+  REFUNDED
+  FROZEN
+}
+
+enum TaskPaymentStatus {
+  UNPAID
+  ESCROW_PENDING
+  ESCROW_HELD
+  RELEASED
+  REFUNDED
+  FROZEN
+}
+
+enum PaymentTransactionType {
+  DIRECT_PAYMENT
+  ESCROW_DEPOSIT
+  ESCROW_RELEASE
+  ESCROW_REFUND
+}
+
+enum PaymentLifecycleStatus {
+  PENDING
+  ESCROW_HELD
+  RELEASE_READY
+  RELEASED
+  FAILED
+  REFUNDED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+  CLOSED
+}
+
+enum SubtaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+enum CertificateVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
